@@ -1,0 +1,17 @@
+{
+  "ftbquests.task.cobblemon_tasks.cobblemon_task": "Cobblemon Task",
+  "ftbquests.task.cobblemon_tasks.cobblemon_task.action": "Action",
+  "ftbquests.task.cobblemon_tasks.cobblemon_task.pokemon": "Pokémon",
+  "ftbquests.task.cobblemon_tasks.cobblemon_task.value": "Value",
+  "ftbquests.task.cobblemon_tasks.cobblemon_task.shiny": "Shiny",
+  "cobblemon.action.catch": "Catch",
+  "cobblemon.action.defeat": "Defeat",
+  "cobblemon.action.kill": "Kill",
+  "cobblemon_quests.task.catch.title": "Catch %sx %s",
+  "cobblemon_quests.task.defeat.title": "Defeat %sx %s",
+  "cobblemon_quests.task.kill.title": "Kill %sx %s",
+  "cobblemon_quests.task.catch.title.shiny": "Catch %sx shiny %s",
+  "cobblemon_quests.task.defeat.title.shiny": "Defeat %sx shiny %s",
+  "cobblemon_quests.task.kill.title.shiny": "Kill %sx shiny %s",
+  "cobblemon.species.choice_any.name": "Any Pokémon"
+}
