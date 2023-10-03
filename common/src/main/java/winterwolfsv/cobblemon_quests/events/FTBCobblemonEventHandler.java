@@ -9,8 +9,9 @@ import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.common.EntityEvent;
 import dev.architectury.hooks.level.entity.PlayerHooks;
+import dev.ftb.mods.ftbquests.api.QuestFile;
 import dev.ftb.mods.ftbquests.events.ClearFileCacheEvent;
-import dev.ftb.mods.ftbquests.quest.QuestFile;
+
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import kotlin.Unit;
@@ -62,7 +63,7 @@ public class FTBCobblemonEventHandler {
             if (actor.getPokemonList().get(0).getEffectedPokemon().getUuid() == lastPokemonUuid) return Unit.INSTANCE;
             if (actor != battleVictoryEvent.getWinners().get(0)) {
                 for (CobblemonTask task : pokemonTasks) {
-                    if (data.getProgress(task) < task.getMaxProgress() && data.canStartTasks(task.quest)) {
+                    if (data.getProgress(task) < task.getMaxProgress() && data.canStartTasks(task.getQuest())) {
                         task.CobblemonTaskIncrease(data, actor.getPokemonList().get(0).getEffectedPokemon(), "defeat");
                     }
                 }
@@ -81,7 +82,7 @@ public class FTBCobblemonEventHandler {
 
         TeamData data = ServerQuestFile.INSTANCE.getNullableTeamData(pokemonCapturedEvent.getPlayer().getUuid());
         for (CobblemonTask task : pokemonTasks) {
-            if (data.getProgress(task) < task.getMaxProgress() && data.canStartTasks(task.quest)) {
+            if (data.getProgress(task) < task.getMaxProgress() && data.canStartTasks(task.getQuest())) {
                 task.CobblemonTaskIncrease(data, pokemonCapturedEvent.getPokemon(), "catch");
             }
         }
@@ -98,10 +99,10 @@ public class FTBCobblemonEventHandler {
                 return EventResult.pass();
             }
 
-            TeamData data = ServerQuestFile.INSTANCE.getData(player);
+            TeamData data = ServerQuestFile.INSTANCE.getOrCreateTeamData(player);
 
             for (CobblemonTask task : pokemonTasks) {
-                if (data.getProgress(task) < task.getMaxProgress() && data.canStartTasks(task.quest)) {
+                if (data.getProgress(task) < task.getMaxProgress() && data.canStartTasks(task.getQuest())) {
                     // Checks if the entity is a pokémon
                     if(livingEntity instanceof PokemonEntity pokemon){
                         // Calls the appropriate method to add progress to the task

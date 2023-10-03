@@ -33,8 +33,8 @@ public class CobblemonTask extends Task {
     public String action = "catch";
     public boolean shiny = false;
 
-    public CobblemonTask(Quest quest) {
-        super(quest);
+    public CobblemonTask(long id, Quest quest) {
+        super(id, quest);
     }
 
     @Override
@@ -85,8 +85,8 @@ public class CobblemonTask extends Task {
 
     @Override
     @Environment(EnvType.CLIENT)
-    public void getConfig(ConfigGroup config) {
-        super.getConfig(config);
+    public void fillConfigGroup(ConfigGroup config) {
+        super.fillConfigGroup(config);
 
         config.addEnum("action", action, v -> action = String.valueOf(v), NameMap.of(action, Arrays.asList("kill", "defeat", "catch"))
                 .nameKey(v -> "cobblemon.action." + v)

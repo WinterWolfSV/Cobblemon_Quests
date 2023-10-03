@@ -13,9 +13,10 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
     // Remove the next line if you don't want to depend on the API
     modImplementation "curse.maven:cobblemon-687131:4468330"
-    modImplementation "curse.maven:ftb-quests-fabric-438496:4710248"
-    modImplementation "curse.maven:ftb-teams-fabric-438497:4611937"
-    modImplementation "curse.maven:ftb-library-fabric-438495:4661833"
+
+    modImplementation "curse.maven:ftb-quests-fabric-438496:4760285"
+    modImplementation "curse.maven:ftb-teams-fabric-438497:4623115"
+    modImplementation "curse.maven:ftb-library-fabric-438495:4720055"
     modApi "dev.architectury:architectury:${rootProject.architectury_version}"
 }
 
