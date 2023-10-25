@@ -28,10 +28,10 @@
   "cobblemon_quests.gender.female": "Female",
   "cobblemon_quests.form.choice_any": "Any form",
   "cobblemon_quests.form.normal": "Normal",
-  "cobblemon_quests.form.alola": "Alola",
-  "cobblemon_quests.form.galar": "Galar",
-  "cobblemon_quests.form.paldea": "Paldea",
-  "cobblemon_quests.form.hisui": "Hisui",
+  "cobblemon_quests.form.alola": "Alolan",
+  "cobblemon_quests.form.galar": "Galarian",
+  "cobblemon_quests.form.paldea": "Paldean",
+  "cobblemon_quests.form.hisui": "Hisuian",
 
   "cobblemon.species.choice_any.name": "Any Pokémon",
   "cobblemon.type.choice_any": "Any type"
