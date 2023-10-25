@@ -5,6 +5,7 @@
   "ftbquests.task.cobblemon_tasks.cobblemon_task.value": "Amount",
   "ftbquests.task.cobblemon_tasks.cobblemon_task.shiny": "Shiny",
   "ftbquests.task.cobblemon_tasks.cobblemon_task.gender": "Gender",
+  "ftbquests.task.cobblemon_tasks.cobblemon_task.form": "Form",
   "ftbquests.task.cobblemon_tasks.cobblemon_task.pokemon_type": "Pokemon Type",
   "cobblemon.action.catch": "Catch",
   "cobblemon.action.defeat": "Defeat",
@@ -25,6 +26,12 @@
   "cobblemon_quests.gender.genderless": "Genderless",
   "cobblemon_quests.gender.male": "Male",
   "cobblemon_quests.gender.female": "Female",
+  "cobblemon_quests.form.choice_any": "Any form",
+  "cobblemon_quests.form.normal": "Normal",
+  "cobblemon_quests.form.alola": "Alolan",
+  "cobblemon_quests.form.galar": "Galarian",
+  "cobblemon_quests.form.paldea": "Paldean",
+  "cobblemon_quests.form.hisui": "Hisuian",
 
   "cobblemon.species.choice_any.name": "Any Pokémon",
   "cobblemon.type.choice_any": "Any type"
