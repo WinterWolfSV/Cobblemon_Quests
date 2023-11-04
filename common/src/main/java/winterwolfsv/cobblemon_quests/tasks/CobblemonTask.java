@@ -36,6 +36,7 @@ public class CobblemonTask extends Task {
     public boolean shiny = false;
     public String pokemon_type = "choice_any";
     public String gender = "choice_any";
+    public String form = "choice_any";
 
 
     public CobblemonTask(Quest quest) {
@@ -61,6 +62,7 @@ public class CobblemonTask extends Task {
         nbt.putBoolean("shiny", shiny);
         nbt.putString("pokemon_type", pokemon_type);
         nbt.putString("gender", gender);
+        nbt.putString("form", form);
     }
 
     @Override
@@ -72,6 +74,7 @@ public class CobblemonTask extends Task {
         shiny = nbt.getBoolean("shiny");
         pokemon_type = nbt.getString("pokemon_type");
         gender = nbt.getString("gender");
+        form = nbt.getString("form");
     }
 
     @Override
@@ -83,6 +86,7 @@ public class CobblemonTask extends Task {
         buffer.writeBoolean(shiny);
         buffer.writeString(pokemon_type, Short.MAX_VALUE);
         buffer.writeString(gender, Short.MAX_VALUE);
+        buffer.writeString(form, Short.MAX_VALUE);
     }
 
     @Override
@@ -94,6 +98,7 @@ public class CobblemonTask extends Task {
         shiny = Boolean.valueOf(buffer.readBoolean());
         pokemon_type = buffer.readString(Short.MAX_VALUE);
         gender = buffer.readString(Short.MAX_VALUE);
+        form = buffer.readString(Short.MAX_VALUE);
     }
 
     @Override
@@ -127,6 +132,12 @@ public class CobblemonTask extends Task {
                 .icon(v -> pokeball_icon)
                 .create(), gender);
 
+        String[] forms = {"choice_any", "normal", "alola", "galar", "paldea", "hisui"};
+        config.addEnum("form", form, v -> form = v, NameMap.of(form, Arrays.asList(forms))
+                .nameKey(v -> "cobblemon_quests.form." + v)
+                .icon(v -> pokeball_icon)
+                .create(), form);
+
 
         String[] pokemon_types = {"choice_any", "normal", "fire", "water", "grass", "electric", "ice", "fighting", "poison", "ground", "flying", "psychic", "bug", "rock", "ghost", "dragon", "dark", "steel", "fairy"};
         config.addEnum("pokemon_type", pokemon_type, v -> pokemon_type = v, NameMap.of(pokemon_type, Arrays.asList(pokemon_types))
@@ -138,17 +149,18 @@ public class CobblemonTask extends Task {
     @Override
     @Environment(EnvType.CLIENT)
     public Text getAltTitle() {
-
         boolean displayGender = !(gender.equals("choice_any") || gender.isEmpty());
         boolean displayType = !(pokemon_type.equals("choice_any") || pokemon_type.isEmpty());
+        boolean displayForm = !(form.equals("choice_any") || form.equals("normal") || form.isEmpty());
 
         Text actionText = Text.translatable("cobblemon.action." + action);
         Text shinyText = shiny ? Text.translatable("ftbquests.task.cobblemon_tasks.cobblemon_task.shiny") : Text.of("");
         Text genderText = displayGender ? Text.translatable("cobblemon_quests.gender." + gender) : Text.of("");
+        Text formText = displayForm ? Text.translatable("cobblemon_quests.form." + form) : Text.of("");
         Text typeText = displayType ? Text.translatable("cobblemon.type." + pokemon_type) : Text.of("");
         Text pokemonName = !Objects.equals(pokemon.getPath(), "choice_any") ? Text.translatable("cobblemon.species." + pokemon.getPath() + ".name") : Text.translatable("ftbquests.task.cobblemon_tasks.cobblemon_task.pokemon");
 
-        return Text.of(actionText.getString() + " " + value + "x" + (shiny ? " " + shinyText.getString() : "") + (displayGender ? " " + genderText.getString() : "") + (displayType ? " " + typeText.getString() : "") + " " + pokemonName.getString());
+        return Text.of(actionText.getString() + " " + value + "x" + (shiny ? " " + shinyText.getString() : "") + (displayGender ? " " + genderText.getString() : "") + (displayForm ? " " + formText.getString() : "") + (displayType ? " " + typeText.getString() : "") + " " + pokemonName.getString());
     }
 
     @Override
@@ -168,6 +180,13 @@ public class CobblemonTask extends Task {
             // Check gender
             if (!(gender.equals("choice_any") || gender.isEmpty())) {
                 if (!p.getGender().toString().toLowerCase().equals(gender)) {
+                    return;
+                }
+            }
+
+            // Check form
+            if (!(form.equals("choice_any") || form.isEmpty())) {
+                if (!p.getForm().getName().toString().toLowerCase().equals(form)) {
                     return;
                 }
             }
