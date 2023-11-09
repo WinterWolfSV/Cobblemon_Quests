@@ -73,7 +73,7 @@ public class FTBCobblemonEventHandler {
             if (actor != battleVictoryEvent.getWinners().get(0)) {
                 for (CobblemonTask task : pokemonTasks) {
                     if (data.getProgress(task) < task.getMaxProgress() && data.canStartTasks(task.getQuest())) {
-                        task.CobblemonTaskIncrease(data, actor.getPokemonList().get(0).getEffectedPokemon(), "defeat");
+                        task.CobblemonTaskIncrease(data, actor.getPokemonList().get(0).getEffectedPokemon(), "defeat", 1);
                     }
                 }
             }
@@ -92,7 +92,7 @@ public class FTBCobblemonEventHandler {
         TeamData data = ServerQuestFile.INSTANCE.getNullableTeamData(pokemonCapturedEvent.getPlayer().getUuid());
         for (CobblemonTask task : pokemonTasks) {
             if (data.getProgress(task) < task.getMaxProgress() && data.canStartTasks(task.getQuest())) {
-                task.CobblemonTaskIncrease(data, pokemonCapturedEvent.getPokemon(), "catch");
+                task.CobblemonTaskIncrease(data, pokemonCapturedEvent.getPokemon(), "catch", 1);
             }
         }
         return Unit.INSTANCE;
@@ -114,7 +114,7 @@ public class FTBCobblemonEventHandler {
                 if (data.getProgress(task) < task.getMaxProgress() && data.canStartTasks(task.getQuest())) {
                     // Checks if the entity is a pokémon
                     if (livingEntity instanceof PokemonEntity pokemon) {
-                        task.CobblemonTaskIncrease(data, pokemon.getPokemon(), "kill");
+                        task.CobblemonTaskIncrease(data, pokemon.getPokemon(), "kill", 1);
                     }
                 }
             }
@@ -131,7 +131,7 @@ public class FTBCobblemonEventHandler {
         TeamData data = ServerQuestFile.INSTANCE.getNullableTeamData(player.getUuid());
         for (CobblemonTask task : pokemonTasks) {
             if (data.getProgress(task) < task.getMaxProgress() && data.canStartTasks(task.getQuest())) {
-                task.CobblemonTaskIncrease(data, pokemon, "catch");
+                task.CobblemonTaskIncrease(data, pokemon, "catch", 1);
             }
         }
         return Unit.INSTANCE;
@@ -157,7 +157,7 @@ public class FTBCobblemonEventHandler {
         TeamData data = ServerQuestFile.INSTANCE.getNullableTeamData(pokemon.getOwnerPlayer().getUuid());
         for (CobblemonTask task : pokemonTasks) {
             if (data.getProgress(task) < task.getMaxProgress() && data.canStartTasks(task.getQuest())) {
-                task.CobblemonTaskIncrease(data, pokemon, "evolve");
+                task.CobblemonTaskIncrease(data, pokemon, "evolve", 1);
             }
         }
 
@@ -176,10 +176,12 @@ public class FTBCobblemonEventHandler {
 
         if (player == null) return Unit.INSTANCE;
 
+        long deltaLevel = levelUpEvent.getNewLevel() - levelUpEvent.getOldLevel();
+
         TeamData data = ServerQuestFile.INSTANCE.getNullableTeamData(player.getUuid());
         for (CobblemonTask task : pokemonTasks) {
             if (data.getProgress(task) < task.getMaxProgress() && data.canStartTasks(task.getQuest())) {
-                task.CobblemonTaskIncrease(data, pokemon, "level_up");
+                task.CobblemonTaskIncrease(data, pokemon, "level_up", deltaLevel);
             }
         }
 

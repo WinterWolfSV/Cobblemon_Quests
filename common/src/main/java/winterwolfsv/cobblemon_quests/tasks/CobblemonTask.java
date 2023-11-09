@@ -173,7 +173,7 @@ public class CobblemonTask extends Task {
     public void onButtonClicked(Button button, boolean canClick) {
     }
 
-    public void CobblemonTaskIncrease(TeamData teamData, Pokemon p, String executedAction) {
+    public void CobblemonTaskIncrease(TeamData teamData, Pokemon p, String executedAction, long progress) {
         if (Objects.equals(action, executedAction)) {
 
             // Check gender
