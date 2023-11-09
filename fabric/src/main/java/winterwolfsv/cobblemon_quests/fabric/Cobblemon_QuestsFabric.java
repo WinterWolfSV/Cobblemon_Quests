@@ -7,5 +7,6 @@ public class Cobblemon_QuestsFabric implements ModInitializer {
     @Override
     public void onInitialize() {
         CobblemonQuests.init();
+
     }
 }

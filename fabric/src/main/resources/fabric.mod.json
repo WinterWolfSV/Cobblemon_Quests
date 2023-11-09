@@ -10,7 +10,9 @@
   "icon": "${mod_icon}",
   "environment": "${environment}",
   "entrypoints": {
-    "main": ["winterwolfsv.cobblemon_quests.fabric.Cobblemon_QuestsFabric"]
+    "main": ["winterwolfsv.cobblemon_quests.fabric.Cobblemon_QuestsFabric"],
+    "client": ["winterwolfsv.cobblemon_quests.fabric.CobblemonQuestsClient"],
+    "server": ["winterwolfsv.cobblemon_quests.fabric.CobblemonQuestsServer"]
   },
   "depends": {
     "fabricloader": "*",
