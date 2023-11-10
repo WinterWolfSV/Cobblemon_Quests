@@ -12,7 +12,7 @@ dependencies {
     // Do NOT use other classes from fabric loader
     modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
     // Remove the next line if you don't want to depend on the API
-    modImplementation "curse.maven:cobblemon-687131:4468330"
+    modImplementation "curse.maven:cobblemon-687131:4797468"
 
     modImplementation "curse.maven:ftb-quests-fabric-438496:4760285"
     modImplementation "curse.maven:ftb-teams-fabric-438497:4623115"
