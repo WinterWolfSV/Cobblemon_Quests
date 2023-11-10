@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Objects;
 
 public class CobblemonTask extends Task {
-    // C:\Users\what1\OneDrive\Dokument\Programming\Java\Minecraft\Cobblemon_Quests_Fabric_Forge\.gradle\loom-cache\remapped_mods\net_fabricmc_yarn_1_20_1_1_20_1_build_10_v2\curse\maven\cobblemon-687131\4468330\cobblemon-687131-4468330.jar!\data\cobblemon\species\generation1\growlithe.json
     Identifier pokemonAnyChoice = new Identifier(CobblemonQuests.MOD_ID, "choice_any");
     public Identifier pokemon = pokemonAnyChoice;
 
@@ -190,8 +189,6 @@ public class CobblemonTask extends Task {
 
     public void CobblemonTaskIncrease(TeamData teamData, Pokemon p, String executedAction, long progress) {
         if (Objects.equals(action, executedAction)) {
-
-            p.getSpecies().getLabels().forEach(System.out::println);
 
             // Check region
             if (!(region.equals("choice_any") || region.isEmpty())) {

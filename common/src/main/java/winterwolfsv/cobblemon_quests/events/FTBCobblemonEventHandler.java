@@ -16,9 +16,10 @@ import dev.architectury.event.events.common.EntityEvent;
 import dev.architectury.hooks.level.entity.PlayerHooks;
 import dev.ftb.mods.ftbquests.api.QuestFile;
 import dev.ftb.mods.ftbquests.events.ClearFileCacheEvent;
-
 import dev.ftb.mods.ftbquests.quest.ServerQuestFile;
 import dev.ftb.mods.ftbquests.quest.TeamData;
+import dev.ftb.mods.ftbteams.api.Team;
+import dev.ftb.mods.ftbteams.data.TeamManagerImpl;
 import kotlin.Unit;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
@@ -61,10 +62,13 @@ public class FTBCobblemonEventHandler {
         List<ServerPlayerEntity> players = battleVictoryEvent.getBattle().getPlayers();
         if (players.size() != 1) return Unit.INSTANCE;
 
-        PlayerEntity player = players.get(0);
+        ServerPlayerEntity player = players.get(0);
         if (!player.getName().equals(battleVictoryEvent.getWinners().get(0).getName())) return Unit.INSTANCE;
 
-        TeamData data = ServerQuestFile.INSTANCE.getNullableTeamData(player.getUuid());
+        Team team = TeamManagerImpl.INSTANCE.getTeamForPlayer(player).orElse(null);
+        if (team == null) return Unit.INSTANCE;
+        TeamData data = ServerQuestFile.INSTANCE.getOrCreateTeamData(team);
+
         Iterable<BattleActor> battleActors = battleVictoryEvent.getBattle().getActors();
         for (BattleActor actor : battleActors) {
             // Checks if the pokemon is the last pokemon that was caught. Done to bypass an issue with two events being
@@ -89,7 +93,10 @@ public class FTBCobblemonEventHandler {
         }
         if (this.pokemonTasks.isEmpty()) return Unit.INSTANCE;
 
-        TeamData data = ServerQuestFile.INSTANCE.getNullableTeamData(pokemonCapturedEvent.getPlayer().getUuid());
+        Team team = TeamManagerImpl.INSTANCE.getTeamForPlayer(pokemonCapturedEvent.getPlayer()).orElse(null);
+        if (team == null) return Unit.INSTANCE;
+        TeamData data = ServerQuestFile.INSTANCE.getOrCreateTeamData(team);
+
         for (CobblemonTask task : pokemonTasks) {
             if (data.getProgress(task) < task.getMaxProgress() && data.canStartTasks(task.getQuest())) {
                 task.CobblemonTaskIncrease(data, pokemonCapturedEvent.getPokemon(), "catch", 1);
@@ -99,7 +106,7 @@ public class FTBCobblemonEventHandler {
     }
 
     private EventResult entityKill(LivingEntity livingEntity, DamageSource damageSource) {
-        if (damageSource.getAttacker() instanceof PlayerEntity player && !PlayerHooks.isFake(player)) {
+        if (damageSource.getAttacker() instanceof ServerPlayerEntity player && !PlayerHooks.isFake(player)) {
             if (pokemonTasks == null) {
                 pokemonTasks = ServerQuestFile.INSTANCE.collect(CobblemonTask.class);
             }
@@ -108,7 +115,9 @@ public class FTBCobblemonEventHandler {
                 return EventResult.pass();
             }
 
-            TeamData data = ServerQuestFile.INSTANCE.getNullableTeamData(player.getUuid());
+            Team team = TeamManagerImpl.INSTANCE.getTeamForPlayer(player).orElse(null);
+            if (team == null) return EventResult.pass();
+            TeamData data = ServerQuestFile.INSTANCE.getOrCreateTeamData(team);
 
             for (CobblemonTask task : pokemonTasks) {
                 if (data.getProgress(task) < task.getMaxProgress() && data.canStartTasks(task.getQuest())) {
@@ -128,7 +137,10 @@ public class FTBCobblemonEventHandler {
         }
         if (this.pokemonTasks.isEmpty()) return Unit.INSTANCE;
 
-        TeamData data = ServerQuestFile.INSTANCE.getNullableTeamData(player.getUuid());
+        Team team = TeamManagerImpl.INSTANCE.getTeamForPlayer((ServerPlayerEntity) player).orElse(null);
+        if (team == null) return Unit.INSTANCE;
+        TeamData data = ServerQuestFile.INSTANCE.getOrCreateTeamData(team);
+
         for (CobblemonTask task : pokemonTasks) {
             if (data.getProgress(task) < task.getMaxProgress() && data.canStartTasks(task.getQuest())) {
                 task.CobblemonTaskIncrease(data, pokemon, "catch", 1);
@@ -153,8 +165,10 @@ public class FTBCobblemonEventHandler {
         if (this.pokemonTasks.isEmpty()) return Unit.INSTANCE;
         Pokemon pokemon = evolutionAcceptedEvent.getPokemon();
 
+        Team team = TeamManagerImpl.INSTANCE.getTeamForPlayer(pokemon.getOwnerPlayer()).orElse(null);
+        if (team == null) return Unit.INSTANCE;
+        TeamData data = ServerQuestFile.INSTANCE.getOrCreateTeamData(team);
 
-        TeamData data = ServerQuestFile.INSTANCE.getNullableTeamData(pokemon.getOwnerPlayer().getUuid());
         for (CobblemonTask task : pokemonTasks) {
             if (data.getProgress(task) < task.getMaxProgress() && data.canStartTasks(task.getQuest())) {
                 task.CobblemonTaskIncrease(data, pokemon, "evolve", 1);
@@ -171,14 +185,17 @@ public class FTBCobblemonEventHandler {
         }
         if (this.pokemonTasks.isEmpty()) return Unit.INSTANCE;
 
-        PlayerEntity player = levelUpEvent.getPokemon().getOwnerPlayer();
+        ServerPlayerEntity player = levelUpEvent.getPokemon().getOwnerPlayer();
         Pokemon pokemon = levelUpEvent.getPokemon();
 
         if (player == null) return Unit.INSTANCE;
 
         long deltaLevel = levelUpEvent.getNewLevel() - levelUpEvent.getOldLevel();
 
-        TeamData data = ServerQuestFile.INSTANCE.getNullableTeamData(player.getUuid());
+        Team team = TeamManagerImpl.INSTANCE.getTeamForPlayer(player).orElse(null);
+        if (team == null) return Unit.INSTANCE;
+        TeamData data = ServerQuestFile.INSTANCE.getOrCreateTeamData(team);
+
         for (CobblemonTask task : pokemonTasks) {
             if (data.getProgress(task) < task.getMaxProgress() && data.canStartTasks(task.getQuest())) {
                 task.CobblemonTaskIncrease(data, pokemon, "level_up", deltaLevel);
