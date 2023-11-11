@@ -18,7 +18,6 @@ public class CobblemonQuestsNetworkingClient {
     }
 
     private static void onClientPlayerJoin(ClientPlayNetworkHandler clientPlayNetworkHandler, PacketSender packetSender, MinecraftClient minecraftClient) {
-        System.out.println("Client player joined");
         ClientPlayNetworking.send(new Identifier("cobblemon_quests:join"), new PacketByteBuf(Unpooled.buffer()).writeString(CobblemonQuests.MOD_VERSION));
     }
 
