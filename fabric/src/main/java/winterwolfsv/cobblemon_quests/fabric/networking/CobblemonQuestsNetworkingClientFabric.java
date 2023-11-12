@@ -11,10 +11,10 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.util.Identifier;
 import winterwolfsv.cobblemon_quests.CobblemonQuests;
 
-public class CobblemonQuestsNetworkingClient {
+public class CobblemonQuestsNetworkingClientFabric {
     @Environment(net.fabricmc.api.EnvType.CLIENT)
     public static void init() {
-        ClientPlayConnectionEvents.JOIN.register(CobblemonQuestsNetworkingClient::onClientPlayerJoin);
+        ClientPlayConnectionEvents.JOIN.register(CobblemonQuestsNetworkingClientFabric::onClientPlayerJoin);
     }
 
     private static void onClientPlayerJoin(ClientPlayNetworkHandler clientPlayNetworkHandler, PacketSender packetSender, MinecraftClient minecraftClient) {

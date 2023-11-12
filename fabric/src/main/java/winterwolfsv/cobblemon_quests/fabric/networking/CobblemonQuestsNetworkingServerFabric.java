@@ -19,11 +19,11 @@ import java.util.logging.Level;
 
 import static winterwolfsv.cobblemon_quests.CobblemonQuests.CONFIG;
 
-public class CobblemonQuestsNetworkingServer {
+public class CobblemonQuestsNetworkingServerFabric {
 
     @Environment(net.fabricmc.api.EnvType.SERVER)
     public static void init() {
-        ServerPlayConnectionEvents.JOIN.register(CobblemonQuestsNetworkingServer::onServerPlayerJoin);
+        ServerPlayConnectionEvents.JOIN.register(CobblemonQuestsNetworkingServerFabric::onServerPlayerJoin);
     }
 
     private static void onServerPlayerJoin(ServerPlayNetworkHandler handler, PacketSender packetSender, MinecraftServer server) {
