@@ -11,8 +11,8 @@
   "environment": "${environment}",
   "entrypoints": {
     "main": ["winterwolfsv.cobblemon_quests.fabric.Cobblemon_QuestsFabric"],
-    "client": ["winterwolfsv.cobblemon_quests.fabric.CobblemonQuestsClient"],
-    "server": ["winterwolfsv.cobblemon_quests.fabric.CobblemonQuestsServer"]
+    "client": ["winterwolfsv.cobblemon_quests.fabric.CobblemonQuestsClientFabric"],
+    "server": ["winterwolfsv.cobblemon_quests.fabric.CobblemonQuestsServerFabric"]
   },
   "depends": {
     "fabricloader": "*",

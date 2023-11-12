@@ -15,11 +15,32 @@ configurations {
     developmentFabric.extendsFrom common
 }
 
+repositories {
+    repositories {
+        maven {
+            url "https://cursemaven.com"
+        }
+        gradlePluginPortal()
+    }
+}
+
 dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+
     modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
     modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_version}"
     // Remove the next line if you don't want to depend on the API
     modApi "dev.architectury:architectury-fabric:${rootProject.architectury_version}"
+
+//    modImplementation "curse.maven:cobblemon-687131:4797468"
+
+    modImplementation "curse.maven:ftb-quests-fabric-438496:4760285"
+    modImplementation "curse.maven:ftb-teams-fabric-438497:4623115"
+    modImplementation "curse.maven:ftb-library-fabric-438495:4720055"
+    modImplementation "curse.maven:item-filters-309674:4838265"
+    include modApi('teamreborn:energy:3.0.0') {
+        transitive = false
+    }
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
