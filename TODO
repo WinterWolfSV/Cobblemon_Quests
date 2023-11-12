@@ -1,4 +1,4 @@
 Add server/client side version checking on forge
-Add config system to allow for disabling of features in case they cause issues
 Add region translations for all languages
 Add external tools for automatic generation of quests
+[Optional] Add support to select a few pokemon instead of only using categories.
