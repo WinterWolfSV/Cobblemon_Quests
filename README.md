@@ -1,7 +1,13 @@
 # Cobblemon Quests
 
 The Cobblemon Quests mod allows you to create quests in FTB Quests where the tasks can be to catch, defeat or kill x
-amount of pokémon.
+amount of pokemon.
+
+## Downloads
+
+The mod can easily be downloaded on either Modrinth or Curseforge \
+Modrinth: https://modrinth.com/mod/cobblemon-quests \
+Curseforge: https://www.curseforge.com/minecraft/mc-mods/cobblemon-quests
 
 ## FAQ:
 
@@ -30,6 +36,11 @@ License. More information about the license can be found under the [License](#li
 The Cobblemon Quests mod is released under the CC-BY-NC-4.0 License. This license allows you to use, modify, and
 distribute the mod for non-commercial purposes, as long as you credit the original author and include a copy of the
 license in any redistributed versions.
+
+## Feature requests
+
+The best way to request a feature is to contact me directly over discord (winterwolfsv). Otherwise, in lack of a discord
+account, GitHub issues can be used to request features as well.
 
 ## Bugs and Feedback
 
