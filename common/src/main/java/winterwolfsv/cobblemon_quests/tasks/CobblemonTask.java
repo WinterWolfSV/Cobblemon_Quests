@@ -2,11 +2,16 @@ package winterwolfsv.cobblemon_quests.tasks;
 
 import com.cobblemon.mod.common.api.pokeball.PokeBalls;
 import com.cobblemon.mod.common.api.pokemon.PokemonSpecies;
+import com.cobblemon.mod.common.client.render.models.blockbench.repository.PokemonModelRepository;
+import com.cobblemon.mod.common.item.CobblemonItem;
+import com.cobblemon.mod.common.item.PokemonItem;
 import com.cobblemon.mod.common.pokemon.Pokemon;
+import com.cobblemon.mod.common.pokemon.Species;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.NameMap;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
+import dev.ftb.mods.ftblibrary.snbt.SNBTCompoundTag;
 import dev.ftb.mods.ftblibrary.ui.Button;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
@@ -14,8 +19,12 @@ import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.task.TaskType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.event.registry.RegistryAttribute;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import winterwolfsv.cobblemon_quests.CobblemonQuests;
@@ -31,6 +40,8 @@ public class CobblemonTask extends Task {
 
     public long value = 1L;
     public Icon pokeball_icon = ItemIcon.getItemIcon(PokeBalls.INSTANCE.getPOKE_BALL().item());
+
+
     public String action = "catch";
     public boolean shiny = false;
     public String pokemon_type = "choice_any";
@@ -119,10 +130,9 @@ public class CobblemonTask extends Task {
         List<Identifier> pokemons = new java.util.ArrayList<>(PokemonSpecies.INSTANCE.getSpecies().stream().map(species -> species.resourceIdentifier).toList());
         pokemons.add(0, pokemonAnyChoice);
 
-
         config.addEnum("pokemon", pokemon, v -> pokemon = v, NameMap.of(pokemon, pokemons)
                 .nameKey(v -> "cobblemon.species." + v.getPath() + ".name")
-                .icon(v -> pokeball_icon)
+                .icon(v -> ItemIcon.getItemIcon(getPokemonItem(v.getPath())))
                 .create(), pokemon);
 
 
@@ -179,12 +189,32 @@ public class CobblemonTask extends Task {
     @Override
     @Environment(EnvType.CLIENT)
     public Icon getAltIcon() {
-        return pokeball_icon;
+        return ItemIcon.getItemIcon(getPokemonItem(pokemon.getPath()));
     }
 
     @Override
     @Environment(EnvType.CLIENT)
     public void onButtonClicked(Button button, boolean canClick) {
+        System.out.println("Button clicked");
+    }
+
+    public ItemStack getPokemonItem(String pokemon_name) {
+
+        if (pokemon_name.equals("choice_any")) {
+            return PokeBalls.INSTANCE.getPOKE_BALL().item().getDefaultStack();
+        }
+        Item pokemon_model_item = Registries.ITEM.get(new Identifier("cobblemon", "pokemon_model"));
+
+        NbtCompound nbt = new NbtCompound();
+        nbt.putString("species", "cobblemon:" + pokemon_name.toLowerCase().trim());
+
+        pokemon_model_item.getDefaultStack().setNbt(nbt);
+
+        ItemStack stack = new ItemStack(pokemon_model_item);
+
+        stack.setNbt(nbt);
+
+        return stack;
     }
 
     public void CobblemonTaskIncrease(TeamData teamData, Pokemon p, String executedAction, long progress) {
