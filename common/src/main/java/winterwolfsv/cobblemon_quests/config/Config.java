@@ -1,6 +1,7 @@
 package winterwolfsv.cobblemon_quests.config;
 
 import com.google.gson.*;
+import winterwolfsv.cobblemon_quests.CobblemonQuests;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,7 +22,7 @@ public class Config {
     private DefaultConfig defaultConfig;
 
     public Config(DefaultConfig defaultConfig) {
-        this.configPath = defaultConfig.CONFIG_FILE_PATH;
+        this.configPath = CobblemonQuests.configPath;
         this.defaultConfig = defaultConfig;
         loadConfig(defaultConfig);
     }
@@ -56,11 +57,15 @@ public class Config {
             } catch (IllegalStateException e) {
                 configData = new JsonObject();
                 LOGGER.log(Level.INFO, "Config file is empty. Creating new config file.");
+            } catch (Exception e){
+                LOGGER.log(Level.WARNING, "Failed to load config file. Please report this with a log file to WinterWolfSV e3 " + Arrays.toString(e.getStackTrace()));
             }
             configStream.close();
 
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING, Arrays.toString(e.getStackTrace()));
+            LOGGER.log(Level.WARNING,"Error IOException ccq"+  Arrays.toString(e.getStackTrace()));
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING, "Failed to load config file. Please report this with a log file to WinterWolfSV e4 " + Arrays.toString(e.getStackTrace()));
         }
 
 
