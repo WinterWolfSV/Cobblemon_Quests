@@ -1,15 +1,11 @@
 package winterwolfsv.cobblemon_quests.forge;
 
 import dev.architectury.platform.forge.EventBuses;
-import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLPaths;
 import winterwolfsv.cobblemon_quests.CobblemonQuests;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import winterwolfsv.cobblemon_quests.config.ConfigCommands;
-import winterwolfsv.cobblemon_quests.forge.config.ConfigCommandsForge;
 import winterwolfsv.cobblemon_quests.forge.networking.Testing;
 
 import static winterwolfsv.cobblemon_quests.CobblemonQuests.MOD_ID;
