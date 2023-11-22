@@ -23,7 +23,7 @@ version = "${version}" #mandatory
 # A display name for the mod
 displayName = "${mod_name}" #mandatory
 # A URL to query for updates for this mod. See the JSON update specification <here>
-updateJSONURL="https://raw.githubusercontent.com/WinterWolfSV/Cobblemon_Quests/1.20.1/forge/src/main/resources/META-INF/forge_mod_versions.json" #optional
+updateJSONURL="https://raw.githubusercontent.com/WinterWolfSV/Cobblemon_Quests/master/forge/src/main/resources/META-INF/forge_mod_versions.json" #optional
 # A URL for the "homepage" for this mod, displayed in the mod UI
 displayURL="https://modrinth.com/mod/cobblemon-quests/versions" #optional
 # A file name (in the root of the mod JAR) containing a logo for display
@@ -61,10 +61,4 @@ mandatory = true
 # This version range declares a minimum of the current minecraft version up to but not including the next major version
 versionRange = "[1.20.1]"
 ordering = "NONE"
-side = "BOTH"
-
-[[dependencies.cobblemon_quests]]
-modId = "cobblemon_quests"
-versionRange = "${version}"
-mandatory = true
 side = "BOTH"
