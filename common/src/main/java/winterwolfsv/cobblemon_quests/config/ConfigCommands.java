@@ -20,6 +20,7 @@ public class ConfigCommands {
     // value: the value to change the setting to, a string, float or boolean
     public static void registerCommands(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(literal("cobblemonquestsconfig")
+                .requires(source -> source.hasPermissionLevel(2))
                 .then(CommandManager.argument("setting", StringArgumentType.string())
                         .suggests((context, builder) -> {
                             DefaultConfig defaultConfig = config.getDefaultConfig();
