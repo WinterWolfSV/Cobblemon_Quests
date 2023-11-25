@@ -53,7 +53,6 @@ public class Config {
             JsonElement root = JsonParser.parseReader(new InputStreamReader(configStream));
             try {
                 configData = root.getAsJsonObject();
-                LOGGER.log(Level.INFO, "Config file loaded.");
             } catch (IllegalStateException e) {
                 configData = new JsonObject();
                 LOGGER.log(Level.INFO, "Config file is empty. Creating new config file.");
