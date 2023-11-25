@@ -29,7 +29,7 @@ dependencies {
 
 
     modImplementation(fabricApi.module("fabric-command-api-v2", "0.89.3+1.20.1"))
-    implementation(project(":common", configuration = "namedElements"))
+    implementation(project(":common", configuration = "namedElements"))?.let { include(it) }
     "developmentFabric"(project(":common", configuration = "namedElements"))
 
 
