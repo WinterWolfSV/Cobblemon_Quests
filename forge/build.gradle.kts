@@ -26,7 +26,7 @@ dependencies {
 
     forge("net.minecraftforge:forge:1.20.1-47.2.0")
 
-    implementation(project(":common", configuration = "namedElements"))
+    implementation(project(":common", configuration = "namedElements"))?.let { include(it) }
     "developmentForge"(project(":common", configuration = "namedElements")) {
         isTransitive = false
     }
