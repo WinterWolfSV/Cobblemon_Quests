@@ -10,7 +10,7 @@ import static winterwolfsv.cobblemon_quests.CobblemonQuests.MOD_ID;
 public class Cobblemon_QuestsFabric implements ModInitializer {
     @Override
     public void onInitialize() {
-        CobblemonQuests.init(FabricLoader.getInstance().getConfigDir().resolve(MOD_ID).resolve(MOD_ID + "_config.json"));
+        CobblemonQuests.init(FabricLoader.getInstance().getConfigDir().resolve(MOD_ID).resolve(MOD_ID + "_config.json"),true);
         ConfigCommandsFabric.registerCommands();
     }
 }

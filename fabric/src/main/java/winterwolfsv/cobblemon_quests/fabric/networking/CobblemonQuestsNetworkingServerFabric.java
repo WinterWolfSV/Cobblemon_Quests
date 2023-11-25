@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 
-import static winterwolfsv.cobblemon_quests.CobblemonQuests.CONFIG;
+import static winterwolfsv.cobblemon_quests.CobblemonQuests.config;
 
 public class CobblemonQuestsNetworkingServerFabric {
 
@@ -27,7 +27,7 @@ public class CobblemonQuestsNetworkingServerFabric {
     }
 
     private static void onServerPlayerJoin(ServerPlayNetworkHandler handler, PacketSender packetSender, MinecraftServer server) {
-        if (!CONFIG.getConfigBool("doVersionVerification")) return;
+        if (!config.getConfigBool("doVersionVerification")) return;
         CompletableFuture<String> joinMessageFuture = new CompletableFuture<>();
 
         Identifier joinMessageIdentifier = new Identifier("cobblemon_quests:join");
@@ -37,7 +37,7 @@ public class CobblemonQuestsNetworkingServerFabric {
         });
 
         try {
-            String bufferString = joinMessageFuture.get((long) CONFIG.getConfigFloat("versionVerificationTimeoutMillis"), TimeUnit.MILLISECONDS);
+            String bufferString = joinMessageFuture.get((long) config.getConfigFloat("versionVerificationTimeoutMillis"), TimeUnit.MILLISECONDS);
 
             if (bufferString.equals(CobblemonQuests.MOD_VERSION)) {
             } else {

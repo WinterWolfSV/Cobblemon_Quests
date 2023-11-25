@@ -16,9 +16,11 @@ public class CobblemonQuests
 	public static Path configPath;
 	public static Config config;
 
-	public static void init(Path configPath) {
-		CobblemonQuests.configPath = configPath;
-		CobblemonQuests.config = new Config(new CobblemonQuestsConfig());
+	public static void init(Path configPath, boolean useConfig) {
+		if (useConfig) {
+			CobblemonQuests.configPath = configPath;
+			CobblemonQuests.config = new Config(new CobblemonQuestsConfig());
+		}
 		new FTBCobblemonEventHandler().init();
 		PokemonTaskTypes.init();
 	}

@@ -10,8 +10,15 @@ import winterwolfsv.cobblemon_quests.config.ConfigCommands;
 public class ConfigCommandsForge {
     public ConfigCommandsForge() {
     }
+
+    /**
+     * Registers commands (currently unused).
+     * <p>
+     * Used for the fabric side of the mod, but the config isn't applicable to the forge side.
+     */
+    @Deprecated
     @SubscribeEvent
     public static void registerCommands(RegisterCommandsEvent event) {
-        ConfigCommands.registerCommands(event.getDispatcher());
+//        ConfigCommands.registerCommands(event.getDispatcher());
     }
 }
