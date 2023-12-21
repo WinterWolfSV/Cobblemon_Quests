@@ -3,6 +3,11 @@ plugins {
     id("architectury-plugin")
 }
 
+architectury {
+    common("forge", "fabric")
+    platformSetupLoomIde()
+}
+
 dependencies {
     minecraft("com.mojang:minecraft:1.20.1")
     mappings("net.fabricmc:yarn:${property("yarn_mappings")}:v2")

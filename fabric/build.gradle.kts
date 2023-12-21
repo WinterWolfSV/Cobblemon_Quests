@@ -1,11 +1,20 @@
 plugins {
     id("dev.architectury.loom")
     id("architectury-plugin")
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 architectury {
     platformSetupLoomIde()
     fabric()
+}
+
+configurations {
+    create("common")
+    create("shadowCommon")
+    compileClasspath.get().extendsFrom(configurations["common"])
+    runtimeClasspath.get().extendsFrom(configurations["common"])
+    getByName("developmentFabric").extendsFrom(configurations["common"])
 }
 
 loom {
@@ -29,8 +38,10 @@ dependencies {
 
 
     modImplementation(fabricApi.module("fabric-command-api-v2", "0.89.3+1.20.1"))
-    implementation(project(":common", configuration = "namedElements"))?.let { include(it) }
-    "developmentFabric"(project(":common", configuration = "namedElements"))
+
+
+    "common"(project(":common", "namedElements")) { isTransitive = false }
+    "shadowCommon"(project(":common", "transformProductionFabric")) { isTransitive = false }
 
 
     modImplementation("com.cobblemon:fabric:1.4.0+1.20.1-SNAPSHOT")
@@ -55,6 +66,29 @@ tasks.processResources {
     ))
 }
 
-tasks.remapJar{
-    archiveBaseName.set("${project.property("archives_base_name")}-fabric")
+
+tasks {
+    base.archivesName.set("${project.property("archives_base_name")}-fabric")
+    processResources {
+        inputs.property("version", project.version)
+
+        filesMatching("META-INF/mods.toml") {
+            expand(mapOf("version" to project.version))
+        }
+    }
+
+    shadowJar {
+        exclude("generations/gg/generations/core/generationscore/fabric/datagen/**")
+        exclude("data/forge/**")
+        configurations = listOf(project.configurations.getByName("shadowCommon"))
+        archiveClassifier.set("dev-shadow")
+    }
+
+    remapJar {
+        injectAccessWidener.set(true)
+        inputFile.set(shadowJar.get().archiveFile)
+        dependsOn(shadowJar)
+    }
+
+    jar.get().archiveClassifier.set("dev")
 }

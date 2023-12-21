@@ -1,3 +1,5 @@
+
+import net.fabricmc.loom.api.LoomGradleExtensionAPI
 plugins {
     id("java")
     id("java-library")
