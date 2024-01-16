@@ -1,10 +1,8 @@
 package winterwolfsv.cobblemon_quests.tasks;
 
-import com.cobblemon.mod.common.api.pokeball.PokeBalls;
 import com.cobblemon.mod.common.api.pokemon.PokemonSpecies;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import dev.ftb.mods.ftblibrary.config.ConfigGroup;
-import dev.ftb.mods.ftblibrary.config.IntConfig;
 import dev.ftb.mods.ftblibrary.config.NameMap;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
@@ -15,29 +13,33 @@ import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.task.TaskType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import winterwolfsv.cobblemon_quests.CobblemonQuests;
+import net.minecraft.util.registry.Registry;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import static winterwolfsv.cobblemon_quests.CobblemonQuests.MOD_ID;
+
 public class CobblemonTask extends Task {
-    Identifier pokemonAnyChoice = new Identifier(CobblemonQuests.MOD_ID, "choice_any");
+    Identifier pokemonAnyChoice = new Identifier(MOD_ID, "choice_any");
     public Identifier pokemon = pokemonAnyChoice;
 
     public long value = 1L;
-    public Icon pokeball_icon = ItemIcon.getItemIcon(PokeBalls.INSTANCE.getPOKE_BALL().item());
+    public Icon pokeball_icon = Icon.getIcon(new Identifier(MOD_ID, "textures/poke_ball.png"));
     public String action = "catch";
     public boolean shiny = false;
     public String pokemon_type = "choice_any";
     public String gender = "choice_any";
     public String form = "choice_any";
-
+    public String region = "choice_any";
 
     public CobblemonTask(Quest quest) {
         super(quest);
@@ -63,6 +65,7 @@ public class CobblemonTask extends Task {
         nbt.putString("pokemon_type", pokemon_type);
         nbt.putString("gender", gender);
         nbt.putString("form", form);
+        nbt.putString("region", region);
     }
 
     @Override
@@ -75,6 +78,7 @@ public class CobblemonTask extends Task {
         pokemon_type = nbt.getString("pokemon_type");
         gender = nbt.getString("gender");
         form = nbt.getString("form");
+        region = nbt.getString("region");
     }
 
     @Override
@@ -87,6 +91,7 @@ public class CobblemonTask extends Task {
         buffer.writeString(pokemon_type, Short.MAX_VALUE);
         buffer.writeString(gender, Short.MAX_VALUE);
         buffer.writeString(form, Short.MAX_VALUE);
+        buffer.writeString(region, Short.MAX_VALUE);
     }
 
     @Override
@@ -99,6 +104,7 @@ public class CobblemonTask extends Task {
         pokemon_type = buffer.readString(Short.MAX_VALUE);
         gender = buffer.readString(Short.MAX_VALUE);
         form = buffer.readString(Short.MAX_VALUE);
+        region = buffer.readString(Short.MAX_VALUE);
     }
 
     @Override
@@ -115,10 +121,9 @@ public class CobblemonTask extends Task {
         List<Identifier> pokemons = new java.util.ArrayList<>(PokemonSpecies.INSTANCE.getSpecies().stream().map(species -> species.resourceIdentifier).toList());
         pokemons.add(0, pokemonAnyChoice);
 
-
         config.addEnum("pokemon", pokemon, v -> pokemon = v, NameMap.of(pokemon, pokemons)
                 .nameKey(v -> "cobblemon.species." + v.getPath() + ".name")
-                .icon(v -> pokeball_icon)
+                .icon(v -> getPokemonItem(v.getPath()))
                 .create(), pokemon);
 
 
@@ -138,6 +143,12 @@ public class CobblemonTask extends Task {
                 .icon(v -> pokeball_icon)
                 .create(), form);
 
+        // Generations: gen1: kanto, gen2: johto, gen3: hoenn, gen4: sinnoh, gen5: unova, gen6: kalos, gen7: alola, gen8: galar, gen9: paldea
+        String[] regions = {"choice_any", "gen1", "gen2", "gen3", "gen4", "gen5", "gen6", "gen7", "gen8", "gen9"};
+        config.addEnum("region", region, v -> region = v, NameMap.of(region, Arrays.asList(regions))
+                .nameKey(v -> "cobblemon_quests.region." + v)
+                .icon(v -> pokeball_icon)
+                .create(), region);
 
         String[] pokemon_types = {"choice_any", "normal", "fire", "water", "grass", "electric", "ice", "fighting", "poison", "ground", "flying", "psychic", "bug", "rock", "ghost", "dragon", "dark", "steel", "fairy"};
         config.addEnum("pokemon_type", pokemon_type, v -> pokemon_type = v, NameMap.of(pokemon_type, Arrays.asList(pokemon_types))
@@ -149,24 +160,27 @@ public class CobblemonTask extends Task {
     @Override
     @Environment(EnvType.CLIENT)
     public Text getAltTitle() {
+
         boolean displayGender = !(gender.equals("choice_any") || gender.isEmpty());
         boolean displayType = !(pokemon_type.equals("choice_any") || pokemon_type.isEmpty());
         boolean displayForm = !(form.equals("choice_any") || form.equals("normal") || form.isEmpty());
+        boolean displayRegion = !(region.equals("choice_any") || region.isEmpty());
 
         Text actionText = Text.translatable("cobblemon.action." + action);
         Text shinyText = shiny ? Text.translatable("ftbquests.task.cobblemon_tasks.cobblemon_task.shiny") : Text.of("");
         Text genderText = displayGender ? Text.translatable("cobblemon_quests.gender." + gender) : Text.of("");
         Text formText = displayForm ? Text.translatable("cobblemon_quests.form." + form) : Text.of("");
         Text typeText = displayType ? Text.translatable("cobblemon.type." + pokemon_type) : Text.of("");
+        Text regionText = displayRegion ? Text.translatable("cobblemon_quests.region." + region) : Text.of("");
         Text pokemonName = !Objects.equals(pokemon.getPath(), "choice_any") ? Text.translatable("cobblemon.species." + pokemon.getPath() + ".name") : Text.translatable("ftbquests.task.cobblemon_tasks.cobblemon_task.pokemon");
 
-        return Text.of(actionText.getString() + " " + value + "x" + (shiny ? " " + shinyText.getString() : "") + (displayGender ? " " + genderText.getString() : "") + (displayForm ? " " + formText.getString() : "") + (displayType ? " " + typeText.getString() : "") + " " + pokemonName.getString());
+        return Text.of(actionText.getString() + " " + value + "x" + (shiny ? " " + shinyText.getString() : "") + (displayGender ? " " + genderText.getString() : "") + (displayForm ? " " + formText.getString() : "") + (displayRegion ? " " + regionText.getString() : "") + (displayType ? " " + typeText.getString() : "") + " " + pokemonName.getString());
     }
 
     @Override
     @Environment(EnvType.CLIENT)
     public Icon getAltIcon() {
-        return pokeball_icon;
+        return getPokemonItem(pokemon.getPath());
     }
 
     @Override
@@ -174,8 +188,33 @@ public class CobblemonTask extends Task {
     public void onButtonClicked(Button button, boolean canClick) {
     }
 
-    public void CobblemonTaskIncrease(TeamData teamData, Pokemon p, String executedAction) {
+    public Icon getPokemonItem(String pokemon_name) {
+
+        if (pokemon_name.equals("choice_any")) {
+            return pokeball_icon;
+        }
+        Item pokemon_model_item = Registry.ITEM.get(new Identifier("cobblemon", "pokemon_model"));
+        NbtCompound nbt = new NbtCompound();
+        nbt.putString("species", "cobblemon:" + pokemon_name.toLowerCase().trim());
+
+        pokemon_model_item.getDefaultStack().setNbt(nbt);
+
+        ItemStack stack = new ItemStack(pokemon_model_item);
+
+        stack.setNbt(nbt);
+
+        return ItemIcon.getItemIcon(stack);
+    }
+
+    public void CobblemonTaskIncrease(TeamData teamData, Pokemon p, String executedAction, long progress) {
         if (Objects.equals(action, executedAction)) {
+
+            // Check region
+            if (!(region.equals("choice_any") || region.isEmpty())) {
+                if(!p.getSpecies().getLabels$common().toString().contains(region)) {
+                    return;
+                }
+            }
 
             // Check gender
             if (!(gender.equals("choice_any") || gender.isEmpty())) {
@@ -186,7 +225,7 @@ public class CobblemonTask extends Task {
 
             // Check form
             if (!(form.equals("choice_any") || form.isEmpty())) {
-                if (!p.getForm().getName().toString().toLowerCase().equals(form)) {
+                if (!p.getForm().getName().toLowerCase().equals(form)) {
                     return;
                 }
             }
@@ -204,9 +243,9 @@ public class CobblemonTask extends Task {
             if (!p.getShiny() && shiny) return;
 
             if (pokemon.getPath().equals("choice_any")) {
-                teamData.addProgress(this, 1L);
+                teamData.addProgress(this, progress);
             } else if (!teamData.isCompleted(this) && pokemon.getPath().equalsIgnoreCase(p.getSpecies().toString())) {
-                teamData.addProgress(this, 1L);
+                teamData.addProgress(this, progress);
             }
         }
     }
