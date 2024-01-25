@@ -15,13 +15,14 @@ public class CobblemonQuests
 	public static final Logger LOGGER = Logger.getLogger(MOD_ID);
 	public static Path configPath;
 	public static Config config;
+	public static FTBCobblemonEventHandler eventHandler;
 
 	public static void init(Path configPath, boolean useConfig) {
 		if (useConfig) {
 			CobblemonQuests.configPath = configPath;
 			CobblemonQuests.config = new Config(new CobblemonQuestsConfig());
 		}
-		new FTBCobblemonEventHandler().init();
+		eventHandler = new FTBCobblemonEventHandler().init();
 		PokemonTaskTypes.init();
 	}
 }

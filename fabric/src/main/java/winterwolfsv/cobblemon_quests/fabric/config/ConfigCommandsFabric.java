@@ -7,6 +7,9 @@ public class ConfigCommandsFabric {
     public static void registerCommands() {
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
                 ConfigCommands.registerCommands(dispatcher));
+//        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
+//                CustomGivePokemonCommand.INSTANCE.register(dispatcher));
+//    }
     }
 }
 
