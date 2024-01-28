@@ -41,6 +41,9 @@ public class ConfigCommands {
                                     DefaultConfig defaultConfig = config.getDefaultConfig();
                                     HashMap<String, Object> configTypes = defaultConfig.getConfigTypes();
                                     configTypes.put("removeBlackListedPokemon", "List");
+                                    if(!configTypes.containsKey(setting)) {
+                                        return CommandSource.suggestMatching(new String[]{}, builder);
+                                    }
                                     if (configTypes.get(setting).equals("String")) {
                                         return CommandSource.suggestMatching(new String[]{"string"}, builder);
                                     } else if (configTypes.get(setting).equals("float") || configTypes.get(setting).equals("int") || configTypes.get(setting).equals("double")) {
