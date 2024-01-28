@@ -213,7 +213,7 @@ public class CobblemonTask extends Task {
 
     public void CobblemonTaskIncrease(TeamData teamData, Pokemon p, String executedAction, long progress) {
         System.out.println(p.getSpecies().toString());
-        if (Objects.equals(action, executedAction)) {
+        if (Objects.equals(action, executedAction) || Objects.equals(action, "obtain")) {
 
             // Check region
             if (!(region.equals("choice_any") || region.isEmpty())) {

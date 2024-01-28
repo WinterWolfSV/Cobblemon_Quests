@@ -11,11 +11,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.logging.Level;
 
 import static winterwolfsv.cobblemon_quests.CobblemonQuests.LOGGER;
 
-
+// TODO Rewrite this mess to actually be usable
 public class Config {
     private final Path configPath;
     private JsonObject configData;
@@ -56,13 +57,13 @@ public class Config {
             } catch (IllegalStateException e) {
                 configData = new JsonObject();
                 LOGGER.log(Level.INFO, "Config file is empty. Creating new config file.");
-            } catch (Exception e){
+            } catch (Exception e) {
                 LOGGER.log(Level.WARNING, "Failed to load config file. Please report this with a log file to WinterWolfSV e3 " + Arrays.toString(e.getStackTrace()));
             }
             configStream.close();
 
         } catch (IOException e) {
-            LOGGER.log(Level.WARNING,"Error IOException ccq"+  Arrays.toString(e.getStackTrace()));
+            LOGGER.log(Level.WARNING, "Error IOException ccq" + Arrays.toString(e.getStackTrace()));
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Failed to load config file. Please report this with a log file to WinterWolfSV e4 " + Arrays.toString(e.getStackTrace()));
         }
@@ -116,15 +117,54 @@ public class Config {
         return configData.get(key).getAsString();
     }
 
+    public List<String> getConfigList(String key) {
+        JsonArray jsonArray = configData.getAsJsonArray(key);
+        return jsonArrayToList(jsonArray);
+    }
+
+
+    private List<String> jsonArrayToList(JsonArray jsonArray) {
+        List<String> list = new java.util.ArrayList<>(jsonArray.size());
+        for (JsonElement jsonElement : jsonArray) {
+            list.add(jsonElement.getAsString());
+        }
+        return list;
+    }
+
 
     public void setConfigValue(String key, Object value) {
         if (value instanceof Number) {
             configData.addProperty(key, (Number) value);
         } else if (value instanceof Boolean) {
             configData.addProperty(key, (boolean) value);
-        } else {
+        } else if (value instanceof String) {
             configData.addProperty(key, (String) value);
+        } else if (value instanceof List<?>) {
+            JsonArray jsonArray = new JsonArray();
+            for (Object object : (List<?>) value) {
+                if (object instanceof Number) {
+                    jsonArray.add((Number) object);
+                } else if (object instanceof Boolean) {
+                    jsonArray.add((boolean) object);
+                } else if (object instanceof String) {
+                    jsonArray.add((String) object);
+                }
+            }
+            configData.add(key, jsonArray);
         }
+        saveConfig();
+    }
+
+    public void addConfigValueStringToList(String listKey, String value) {
+
+        configData.getAsJsonArray(listKey).add(value);
+        saveConfig();
+    }
+
+    public void removeConfigValueFromList(String listKey, String value) {
+        JsonArray jsonArray = configData.getAsJsonArray(listKey);
+        JsonElement jsonElement = new JsonPrimitive(value);
+        jsonArray.remove(jsonElement);
         saveConfig();
     }
 
