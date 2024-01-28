@@ -18,9 +18,7 @@ import static net.minecraft.server.command.CommandManager.literal;
 import static winterwolfsv.cobblemon_quests.CobblemonQuests.config;
 
 public class ConfigCommands {
-    // /cobblemonquestsconfig <setting> <value>
-    // setting: the setting to change, a string
-    // value: the value to change the setting to, a string, float or boolean
+    // WTF? Mixture of dynamic, static and just plain bad. Trying to add features to this is a nightmare.
     public static void registerCommands(CommandDispatcher<ServerCommandSource> dispatcher) {
         dispatcher.register(literal("cobblemonquestsconfig")
                 .requires(source -> source.hasPermissionLevel(2))
@@ -53,49 +51,43 @@ public class ConfigCommands {
                                         List<Identifier> pokemons = new ArrayList<>(PokemonSpecies.INSTANCE.getSpecies().stream().map(species -> species.resourceIdentifier).toList());
                                         List<String> pokemonStrings = pokemons.stream().map(identifier -> "\"" + identifier.toString() + "\"").toList();
                                         return CommandSource.suggestMatching(pokemonStrings, builder);
-                                    } else if(Objects.equals(setting, "removeBlackListedPokemon")) {
+                                    } else if (Objects.equals(setting, "removeBlackListedPokemon")) {
                                         List<String> pokemonStrings = config.getConfigList("blackListedPokemon").stream().map(identifier -> "\"" + identifier + "\"").toList();
                                         return CommandSource.suggestMatching(pokemonStrings, builder);
                                     }
                                     return CommandSource.suggestMatching(new String[]{"string"}, builder);
                                 })
                                 .executes(context -> {
-                                    System.out.println("stage -1");
                                     String setting = StringArgumentType.getString(context, "setting");
                                     String value = StringArgumentType.getString(context, "value");
                                     Object newValue = null;
-                                    System.out.println("stage 0");
 
                                     DefaultConfig defaultConfig = config.getDefaultConfig();
                                     HashMap<String, Object> configTypes = defaultConfig.getConfigTypes();
                                     configTypes.put("removeBlackListedPokemon", "List");
 
-                                    System.out.println("stage 1");
 
                                     if ((configTypes.get(setting).equals("float") || configTypes.get(setting).equals("int") || configTypes.get(setting).equals("double"))) {
-                                        System.out.println("stage 2");
                                         try {
                                             newValue = Float.parseFloat(value);
                                         } catch (NumberFormatException ignore) {
                                         }
                                     } else if (configTypes.get(setting).equals("boolean")) {
-                                        System.out.println("stage 3");
                                         if ((value.equals("true") || value.equals("false"))) {
                                             newValue = Boolean.parseBoolean(value);
                                         }
                                     } else if (configTypes.get(setting).equals("String")) {
-                                        System.out.println("stage 4");
                                         newValue = value;
                                     } else if (setting.equals("blackListedPokemon")) {
-                                        System.out.println("blackListedPokemon");
                                         config.addConfigValueStringToList(setting, value);
                                     } else if (setting.equals("removeBlackListedPokemon")) {
-                                        System.out.println("removeBlackListedPokemon");
                                         config.removeConfigValueFromList("blackListedPokemon", value);
                                     }
-
-                                    if (configTypes.get(setting).equals("List")) {
+                                    if (setting.equals("blackListedPokemon")) {
                                         context.getSource().sendMessage(Text.of("§aAdded §2" + value + "§a to §2" + setting));
+                                        return 1;
+                                    } else if (setting.equals("removeBlackListedPokemon")) {
+                                        context.getSource().sendMessage(Text.of("§aRemoved §2" + value + "§a from §2" + setting));
                                         return 1;
                                     } else if (newValue != null) {
                                         config.setConfigValue(setting, newValue);
