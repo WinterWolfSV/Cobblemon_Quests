@@ -7,7 +7,6 @@ import dev.ftb.mods.ftblibrary.config.ConfigGroup;
 import dev.ftb.mods.ftblibrary.config.NameMap;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
-import dev.ftb.mods.ftblibrary.ui.Button;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbquests.quest.task.Task;
@@ -117,7 +116,8 @@ public class CobblemonTask extends Task {
     public void fillConfigGroup(ConfigGroup config) {
         super.fillConfigGroup(config);
 
-        config.addEnum("action", action, v -> action = String.valueOf(v), NameMap.of(action, Arrays.asList("catch", "defeat", "evolve", "kill", "level_up"))
+        // TODO Verify functionality of trade away and trade for
+        config.addEnum("action", action, v -> action = String.valueOf(v), NameMap.of(action, Arrays.asList("catch", "defeat", "evolve", "kill", "level_up", "release", "trade_away", "trade_for", "obtain"))
                 .nameKey(v -> "cobblemon.action." + v)
                 .icon(v -> pokeball_icon)
                 .create(), action);
@@ -188,11 +188,7 @@ public class CobblemonTask extends Task {
         return ItemIcon.getItemIcon(getPokemonItem(pokemon.getPath()));
     }
 
-    @Override
-    @Environment(EnvType.CLIENT)
-    public void onButtonClicked(Button button, boolean canClick) {
-        System.out.println("Button clicked");
-    }
+
 
     public ItemStack getPokemonItem(String pokemon_name) {
 
@@ -215,10 +211,9 @@ public class CobblemonTask extends Task {
 
     public void CobblemonTaskIncrease(TeamData teamData, Pokemon p, String executedAction, long progress) {
         List<String> blackListedPokemon = config.getConfigList("blackListedPokemon");
-        System.out.println(p.getSpecies().toString());
-        if (blackListedPokemon.contains("cobblemon:"+p.getSpecies().toString())) return;
+        if (blackListedPokemon.contains("cobblemon:" + p.getSpecies().toString())) return;
 
-        if (Objects.equals(action, executedAction) || Objects.equals(action, "obtain")) {
+        if (Objects.equals(action, executedAction) || (Objects.equals(action, "obtain")) && !Objects.equals(action, "release") && !Objects.equals(action, "trade_away")) {
 
             // Check region
             if (!(region.equals("choice_any") || region.isEmpty())) {

@@ -6,9 +6,11 @@ import com.cobblemon.mod.common.api.events.CobblemonEvents;
 import com.cobblemon.mod.common.api.events.battles.BattleVictoryEvent;
 import com.cobblemon.mod.common.api.events.pokemon.LevelUpEvent;
 import com.cobblemon.mod.common.api.events.pokemon.PokemonCapturedEvent;
+import com.cobblemon.mod.common.api.events.pokemon.TradeCompletedEvent;
 import com.cobblemon.mod.common.api.events.pokemon.evolution.EvolutionAcceptedEvent;
 import com.cobblemon.mod.common.api.events.pokemon.evolution.EvolutionCompleteEvent;
 import com.cobblemon.mod.common.api.events.starter.StarterChosenEvent;
+import com.cobblemon.mod.common.api.events.storage.ReleasePokemonEvent;
 import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import dev.architectury.event.EventResult;
@@ -44,8 +46,47 @@ public class FTBCobblemonEventHandler {
         CobblemonEvents.EVOLUTION_COMPLETE.subscribe(Priority.LOWEST, this::pokemonEvolutionComplete);
         CobblemonEvents.LEVEL_UP_EVENT.subscribe(Priority.LOWEST, this::pokemonLevelUp);
         CobblemonEvents.EVOLUTION_ACCEPTED.subscribe(Priority.LOWEST, this::pokemonEvolutionAccepted);
+        CobblemonEvents.TRADE_COMPLETED.subscribe(Priority.LOWEST, this::pokemonTrade);
+        CobblemonEvents.POKEMON_RELEASED_EVENT_POST.subscribe(Priority.LOWEST, this::pokemonRelease);
         return this;
     }
+
+    private Unit pokemonRelease(ReleasePokemonEvent.Post post) {
+        PlayerEntity player = post.getPlayer();
+        Pokemon pokemon = post.getPokemon();
+
+        if (this.pokemonTasks == null) {
+            this.pokemonTasks = ServerQuestFile.INSTANCE.collect(CobblemonTask.class);
+        }
+        if (this.pokemonTasks.isEmpty()) return Unit.INSTANCE;
+        Team team = TeamManagerImpl.INSTANCE.getTeamForPlayer((ServerPlayerEntity) player).orElse(null);
+        if (team == null) return Unit.INSTANCE;
+        TeamData data = ServerQuestFile.INSTANCE.getOrCreateTeamData(team);
+        for (CobblemonTask task : pokemonTasks) {
+            if (data.getProgress(task) < task.getMaxProgress() && data.canStartTasks(task.getQuest())) {
+                task.CobblemonTaskIncrease(data, pokemon, "release", 1);
+            }
+        }
+        return Unit.INSTANCE;
+    }
+
+    private Unit pokemonTrade(TradeCompletedEvent tradeCompletedEvent) {
+        UUID playerUuid = tradeCompletedEvent.getTradeParticipant1().getUuid();
+        Pokemon pokemonGiven = tradeCompletedEvent.getTradeParticipant1Pokemon();
+        Pokemon pokemonReceived = tradeCompletedEvent.getTradeParticipant2Pokemon();
+        System.out.println("Player uuid " + playerUuid + " pokemon given " + pokemonGiven.getSpecies().getName() + " pokemon received " + pokemonReceived.getSpecies().getName());
+        Team team = TeamManagerImpl.INSTANCE.getTeamForPlayerID(playerUuid).orElse(null);
+        if (team == null) return Unit.INSTANCE;
+        TeamData data = ServerQuestFile.INSTANCE.getOrCreateTeamData(team);
+        for (CobblemonTask task : pokemonTasks) {
+            if (data.getProgress(task) < task.getMaxProgress() && data.canStartTasks(task.getQuest())) {
+                task.CobblemonTaskIncrease(data, pokemonGiven, "trade_away", 1);
+                task.CobblemonTaskIncrease(data, pokemonReceived, "trade_for", 1);
+            }
+        }
+        return Unit.INSTANCE;
+    }
+
 
     private void fileCacheClear(QuestFile file) {
         if (file.isServerSide()) {
@@ -147,6 +188,23 @@ public class FTBCobblemonEventHandler {
             }
         }
         return Unit.INSTANCE;
+    }
+
+    public void pokemonObtain(Pokemon pokemon, PlayerEntity player) {
+        if (this.pokemonTasks == null) {
+            this.pokemonTasks = ServerQuestFile.INSTANCE.collect(CobblemonTask.class);
+        }
+        if (this.pokemonTasks.isEmpty()) return;
+
+        Team team = TeamManagerImpl.INSTANCE.getTeamForPlayer((ServerPlayerEntity) player).orElse(null);
+        if (team == null) return;
+        TeamData data = ServerQuestFile.INSTANCE.getOrCreateTeamData(team);
+
+        for (CobblemonTask task : pokemonTasks) {
+            if (data.getProgress(task) < task.getMaxProgress() && data.canStartTasks(task.getQuest())) {
+                task.CobblemonTaskIncrease(data, pokemon, "obtain", 1);
+            }
+        }
     }
 
     private Unit pokemonStarterChosen(StarterChosenEvent starterChosenEvent) {
