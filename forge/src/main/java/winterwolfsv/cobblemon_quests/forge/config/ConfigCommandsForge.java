@@ -19,6 +19,6 @@ public class ConfigCommandsForge {
     @Deprecated
     @SubscribeEvent
     public static void registerCommands(RegisterCommandsEvent event) {
-//        ConfigCommands.registerCommands(event.getDispatcher());
+        ConfigCommands.registerCommands(event.getDispatcher());
     }
 }

@@ -14,6 +14,6 @@ public class Cobblemon_QuestsForge {
 
     public Cobblemon_QuestsForge() {
         EventBuses.registerModEventBus(MOD_ID, FMLJavaModLoadingContext.get().getModEventBus());
-        CobblemonQuests.init(FMLPaths.CONFIGDIR.get().resolve(MOD_ID).resolve(MOD_ID + "_config.json"), false);
+        CobblemonQuests.init(FMLPaths.CONFIGDIR.get().resolve(MOD_ID).resolve(MOD_ID + "_config.json"), true);
     }
 }
