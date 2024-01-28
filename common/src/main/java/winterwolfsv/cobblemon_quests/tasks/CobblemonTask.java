@@ -25,6 +25,7 @@ import winterwolfsv.cobblemon_quests.CobblemonQuests;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import static winterwolfsv.cobblemon_quests.CobblemonQuests.config;
 
@@ -156,7 +157,7 @@ public class CobblemonTask extends Task {
         Text formText = displayForm ? Text.translatable("cobblemon_quests.form." + form) : Text.of("");
         Text typeText = displayType ? Text.translatable("cobblemon.type." + pokemonType) : Text.of("");
         Text regionText = displayRegion ? Text.translatable("cobblemon_quests.region." + region) : Text.of("");
-        Text pokemonName = pokemon.getPath() != "choice_any" ? Text.translatable("cobblemon.species." + pokemon.getPath() + ".name") : Text.translatable("ftbquests.task.cobblemon_tasks.cobblemon_task.pokemon");
+        Text pokemonName = !Objects.equals(pokemon.getPath(), "choice_any") ? Text.translatable("cobblemon.species." + pokemon.getPath() + ".name") : Text.translatable("ftbquests.task.cobblemon_tasks.cobblemon_task.pokemon");
 
         return Text.of(actionText.getString() + " " + value + "x" + (shiny ? " " + shinyText.getString() : "") + (displayGender ? " " + genderText.getString() : "") + (displayForm ? " " + formText.getString() : "") + (displayRegion ? " " + regionText.getString() : "") + (displayType ? " " + typeText.getString() : "") + " " + pokemonName.getString());
     }
@@ -182,11 +183,10 @@ public class CobblemonTask extends Task {
     }
 
     public void CobblemonTaskIncrease(TeamData teamData, Pokemon p, String executedAction, long progress) {
+        String[] obtainingMethods = {"catch", "evolve", "trade_for", "obtain"};
         List<String> blackListedPokemon = config.getConfigList("blackListedPokemon");
         if (blackListedPokemon.contains("cobblemon:" + p.getSpecies().toString())) return;
-
-        if (action == executedAction || (action == "obtain" && executedAction != "release" && executedAction != "trade_away")) {
-
+        if (Objects.equals(action, executedAction) || (action.equals("obtain") && Arrays.asList(obtainingMethods).contains(executedAction))) {
             // Check region
             if (!(region.equals("choice_any") || region.isEmpty())) {
                 if (!p.getSpecies().getLabels().toString().contains((region))) {
