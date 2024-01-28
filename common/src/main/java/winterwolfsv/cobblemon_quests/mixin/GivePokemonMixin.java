@@ -33,21 +33,26 @@ public abstract class GivePokemonMixin {
         String input = context.getInput().toLowerCase(Locale.ROOT);
         Pattern pattern = Pattern.compile("(?<=countascatch=)\\w*");
         Matcher matcher = pattern.matcher(input);
+        PokemonProperties pokemonProperties;
+        Pokemon pokemon = null;
+        try {
+            pokemonProperties = PokemonPropertiesArgumentType.Companion.getPokemonProperties(context, "properties");
+            pokemon = pokemonProperties.create();
+        } catch (Exception e) {
+            CobblemonQuests.LOGGER.severe(() -> "Failed to create pokemon from properties. " + e.getMessage());
 
+        }
         if (matcher.find()) {
             String value = matcher.group(0);
             if (value.equals("true")) {
-                player.sendMessage(Text.of("true"), false);
-                try {
-                    PokemonProperties pokemonProperties = PokemonPropertiesArgumentType.Companion.getPokemonProperties(context, "properties");
-                    Pokemon pokemon = pokemonProperties.create();
-                    CobblemonQuests.eventHandler.pokemonCatch(pokemon, player);
-                } catch (Exception e) {
-                    System.out.println("Error: " + e);
-                }
-            } else if(!value.equals("false")){
+                CobblemonQuests.eventHandler.pokemonCatch(pokemon, player);
+            } else if (value.equals("false")) {
+                CobblemonQuests.eventHandler.pokemonObtain(pokemon, player);
+            } else {
                 player.sendMessage(Text.of("Command literal \"countascatch\" must be either true or false."), false);
             }
+        } else {
+            CobblemonQuests.eventHandler.pokemonObtain(pokemon, player);
         }
     }
 }
