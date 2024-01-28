@@ -3,3 +3,4 @@ gradle
 run
 build
 .idea
+/forge/.architectury-transformer/debug.log
