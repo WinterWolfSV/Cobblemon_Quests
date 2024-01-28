@@ -28,6 +28,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import static winterwolfsv.cobblemon_quests.CobblemonQuests.config;
+
 public class CobblemonTask extends Task {
     Identifier pokemonAnyChoice = new Identifier(CobblemonQuests.MOD_ID, "choice_any");
     public Identifier pokemon = pokemonAnyChoice;
@@ -212,7 +214,10 @@ public class CobblemonTask extends Task {
     }
 
     public void CobblemonTaskIncrease(TeamData teamData, Pokemon p, String executedAction, long progress) {
+        List<String> blackListedPokemon = config.getConfigList("blackListedPokemon");
         System.out.println(p.getSpecies().toString());
+        if (blackListedPokemon.contains("cobblemon:"+p.getSpecies().toString())) return;
+
         if (Objects.equals(action, executedAction) || Objects.equals(action, "obtain")) {
 
             // Check region

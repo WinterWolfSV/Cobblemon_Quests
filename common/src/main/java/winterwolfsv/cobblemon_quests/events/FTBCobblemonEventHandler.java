@@ -35,7 +35,7 @@ public class FTBCobblemonEventHandler {
     private List<CobblemonTask> pokemonTasks = null;
     private UUID lastPokemonUuid = null;
 
-    public void init() {
+    public FTBCobblemonEventHandler init() {
         EntityEvent.LIVING_DEATH.register(this::entityKill);
         ClearFileCacheEvent.EVENT.register(this::fileCacheClear);
         CobblemonEvents.POKEMON_CAPTURED.subscribe(Priority.LOWEST, this::pokemonCatch);
@@ -44,7 +44,7 @@ public class FTBCobblemonEventHandler {
         CobblemonEvents.EVOLUTION_COMPLETE.subscribe(Priority.LOWEST, this::pokemonEvolutionComplete);
         CobblemonEvents.LEVEL_UP_EVENT.subscribe(Priority.LOWEST, this::pokemonLevelUp);
         CobblemonEvents.EVOLUTION_ACCEPTED.subscribe(Priority.LOWEST, this::pokemonEvolutionAccepted);
-
+        return this;
     }
 
     private void fileCacheClear(QuestFile file) {
@@ -131,7 +131,7 @@ public class FTBCobblemonEventHandler {
         return EventResult.pass();
     }
 
-    private Unit pokemonCatch(Pokemon pokemon, PlayerEntity player) {
+    public Unit pokemonCatch(Pokemon pokemon, PlayerEntity player) {
         if (this.pokemonTasks == null) {
             this.pokemonTasks = ServerQuestFile.INSTANCE.collect(CobblemonTask.class);
         }
