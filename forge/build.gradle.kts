@@ -20,12 +20,15 @@ configurations {
 }
 
 loom {
+    forge{
+        mixinConfig("cobblemon_quests-common.mixins.json")
+    }
     enableTransitiveAccessWideners.set(true)
     silentMojangMappingsLicense()
 
-    mixin {
-        defaultRefmapName.set("mixins.${project.name}.refmap.json")
-    }
+//    mixin {
+//        defaultRefmapName.set("cobblemon_quests-common.mixins.json")
+//    }
 }
 
 dependencies {
