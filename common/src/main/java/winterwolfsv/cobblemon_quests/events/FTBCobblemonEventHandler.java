@@ -51,6 +51,12 @@ public class FTBCobblemonEventHandler {
         return this;
     }
 
+    private void fileCacheClear(QuestFile file) {
+        if (file.isServerSide()) {
+            pokemonTasks = null;
+        }
+    }
+
     private Unit pokemonRelease(ReleasePokemonEvent.Post post) {
         PlayerEntity player = post.getPlayer();
         Pokemon pokemon = post.getPokemon();
@@ -70,29 +76,42 @@ public class FTBCobblemonEventHandler {
         return Unit.INSTANCE;
     }
 
+    /**
+     * Player 1 gives pokemon 1 to player 2
+     * Player 2 gives pokemon 2 to player 1
+     * @param tradeCompletedEvent
+     * @return
+     */
     private Unit pokemonTrade(TradeCompletedEvent tradeCompletedEvent) {
-        UUID playerUuid = tradeCompletedEvent.getTradeParticipant1().getUuid();
-        Pokemon pokemonGiven = tradeCompletedEvent.getTradeParticipant1Pokemon();
-        Pokemon pokemonReceived = tradeCompletedEvent.getTradeParticipant2Pokemon();
-        System.out.println("Player uuid " + playerUuid + " pokemon given " + pokemonGiven.getSpecies().getName() + " pokemon received " + pokemonReceived.getSpecies().getName());
-        Team team = TeamManagerImpl.INSTANCE.getTeamForPlayerID(playerUuid).orElse(null);
-        if (team == null) return Unit.INSTANCE;
-        TeamData data = ServerQuestFile.INSTANCE.getOrCreateTeamData(team);
+        UUID playerUuid1 = tradeCompletedEvent.getTradeParticipant1().getUuid();
+        UUID playerUuid2 = tradeCompletedEvent.getTradeParticipant2().getUuid();
+        Pokemon pokemonGivenByPlayer1 = tradeCompletedEvent.getTradeParticipant2Pokemon();
+        Pokemon pokemonGivenByPlayer2 = tradeCompletedEvent.getTradeParticipant1Pokemon();
+
+        if (this.pokemonTasks == null) {
+            this.pokemonTasks = ServerQuestFile.INSTANCE.collect(CobblemonTask.class);
+        }
+
+//        System.out.println("Player uuid " + playerUuid1 + " pokemon given " + pokemonGivenByPlayer1.getSpecies().getName() + " pokemon received " + pokemonGivenByPlayer2.getSpecies().getName());
+//        System.out.println("Player uuid " + playerUuid2 + " pokemon given " + pokemonGivenByPlayer2.getSpecies().getName() + " pokemon received " + pokemonGivenByPlayer1.getSpecies().getName());
+        Team teamPlayer1 = TeamManagerImpl.INSTANCE.getTeamForPlayerID(playerUuid1).orElse(null);
+        Team teamPlayer2 = TeamManagerImpl.INSTANCE.getTeamForPlayerID(playerUuid2).orElse(null);
+
+        TeamData dataPlayer1 = ServerQuestFile.INSTANCE.getOrCreateTeamData(teamPlayer1);
+        TeamData dataPlayer2 = ServerQuestFile.INSTANCE.getOrCreateTeamData(teamPlayer2);
         for (CobblemonTask task : pokemonTasks) {
-            if (data.getProgress(task) < task.getMaxProgress() && data.canStartTasks(task.getQuest())) {
-                task.CobblemonTaskIncrease(data, pokemonGiven, "trade_away", 1);
-                task.CobblemonTaskIncrease(data, pokemonReceived, "trade_for", 1);
+            if (dataPlayer1.getProgress(task) < task.getMaxProgress() && dataPlayer1.canStartTasks(task.getQuest())) {
+                task.CobblemonTaskIncrease(dataPlayer1, pokemonGivenByPlayer2, "trade_for", 1);
+                task.CobblemonTaskIncrease(dataPlayer1, pokemonGivenByPlayer1, "trade_away", 1);
+            }
+            if (dataPlayer2.getProgress(task) < task.getMaxProgress() && dataPlayer2.canStartTasks(task.getQuest())) {
+                task.CobblemonTaskIncrease(dataPlayer2, pokemonGivenByPlayer1, "trade_for", 1);
+                task.CobblemonTaskIncrease(dataPlayer2, pokemonGivenByPlayer2, "trade_away", 1);
             }
         }
         return Unit.INSTANCE;
     }
 
-
-    private void fileCacheClear(QuestFile file) {
-        if (file.isServerSide()) {
-            pokemonTasks = null;
-        }
-    }
 
     private Unit pokemonBattleVictory(BattleVictoryEvent battleVictoryEvent) {
         if (pokemonTasks == null) {
