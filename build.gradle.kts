@@ -1,5 +1,3 @@
-
-import net.fabricmc.loom.api.LoomGradleExtensionAPI
 plugins {
     id("java")
     id("java-library")
@@ -20,11 +18,8 @@ allprojects {
 
     repositories {
         mavenCentral()
-        maven(url = "https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/")
         maven("https://maven.impactdev.net/repository/development/")
         maven ("https://cursemaven.com")
-        maven("https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/")
-        maven("https://hub.spigotmc.org/nexus/content/groups/public/")
         maven("https://thedarkcolour.github.io/KotlinForForge/")
     }
 }
