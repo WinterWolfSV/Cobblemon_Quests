@@ -7,7 +7,7 @@ plugins {
     id("architectury-plugin") version ("3.4-SNAPSHOT") apply false
 }
 
-group = "com.cobblemon.mdks"
+group = "${property("maven_group")}"
 
 allprojects {
     apply(plugin = "java")

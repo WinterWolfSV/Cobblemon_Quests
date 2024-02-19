@@ -20,15 +20,17 @@ configurations {
 }
 
 loom {
-    forge{
+    @Suppress("UnstableApiUsage")
+    mixin {
+        defaultRefmapName.set("cobblemon_quests-${project.name}.refmap.json")
+    }
+    forge {
         mixinConfig("cobblemon_quests-common.mixins.json")
     }
     enableTransitiveAccessWideners.set(true)
     silentMojangMappingsLicense()
 
-//    mixin {
-//        defaultRefmapName.set("cobblemon_quests-common.mixins.json")
-//    }
+
 }
 
 dependencies {

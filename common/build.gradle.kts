@@ -8,6 +8,11 @@ architectury {
     platformSetupLoomIde()
 }
 
+@Suppress("UnstableApiUsage")
+loom.mixin {
+    defaultRefmapName.set("cobblemon_quests-${project.name}.refmap.json")
+}
+
 dependencies {
     minecraft("com.mojang:minecraft:1.20.1")
     mappings("net.fabricmc:yarn:${property("yarn_mappings")}:v2")
