@@ -16,4 +16,8 @@ public class Cobblemon_QuestsForge {
         EventBuses.registerModEventBus(MOD_ID, FMLJavaModLoadingContext.get().getModEventBus());
         CobblemonQuests.init(FMLPaths.CONFIGDIR.get().resolve(MOD_ID).resolve(MOD_ID + ".config"), true);
     }
+//    @SubscribeEvent
+//    public static void onItemRegistryEvent(RegisterEvent event) {
+//        Registry.register(Registries.ITEM, new Identifier(MOD_ID, "poke_ball_icon"), new Item(new Item.Settings()));
+//    }
 }
