@@ -21,13 +21,12 @@ import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import winterwolfsv.cobblemon_quests.CobblemonQuests;
+import winterwolfsv.cobblemon_quests.config.CobblemonQuestsConfig;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-
-import static winterwolfsv.cobblemon_quests.CobblemonQuests.config;
 
 public class CobblemonTask extends Task {
     Identifier pokemonAnyChoice = new Identifier(CobblemonQuests.MOD_ID, "choice_any");
@@ -184,8 +183,7 @@ public class CobblemonTask extends Task {
 
     public void CobblemonTaskIncrease(TeamData teamData, Pokemon p, String executedAction, long progress) {
         String[] obtainingMethods = {"catch", "evolve", "trade_for", "obtain"};
-        List<String> blackListedPokemon = config.getConfigList("blackListedPokemon");
-        if (blackListedPokemon.contains("cobblemon:" + p.getSpecies().toString())) return;
+        if (CobblemonQuestsConfig.ignoredPokemon.contains(p.getSpecies().toString().toLowerCase())) return;
         if (Objects.equals(action, executedAction) || (action.equals("obtain") && Arrays.asList(obtainingMethods).contains(executedAction))) {
             // Check region
             if (!(region.equals("choice_any") || region.isEmpty())) {
