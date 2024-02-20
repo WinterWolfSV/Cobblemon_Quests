@@ -16,6 +16,10 @@ allprojects {
     version = "${property("mod_version")}"
     group = "${property("maven_group")}"
 
+    dependencies {
+        implementation("org.yaml:snakeyaml:2.2")
+    }
+
     repositories {
         mavenCentral()
         maven("https://maven.impactdev.net/repository/development/")
