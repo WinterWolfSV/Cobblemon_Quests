@@ -9,7 +9,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Level;
 
 import static winterwolfsv.cobblemon_quests.CobblemonQuests.LOGGER;
 
@@ -33,7 +32,7 @@ public class CobblemonQuestsConfig {
             for (String line : Files.readAllLines(configPath)) {
                 String[] split = line.split(": ");
                 if (split.length != 2) {
-                    LOGGER.log(Level.WARNING, "Failed to parse config line: " + line);
+                    LOGGER.warning("Failed to parse config line: " + line);
                     continue;
                 }
                 String key = split[0];
@@ -51,11 +50,11 @@ public class CobblemonQuestsConfig {
                         ignoredPokemon = new ArrayList<>(List.of(Arrays.stream(value.split(", ")).map(String::trim).toArray(String[]::new)));
                         break;
                     default:
-                        LOGGER.log(Level.WARNING, "Unknown config key: " + key);
+                        LOGGER.warning("Unknown config key: " + key);
                 }
             }
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Failed to load config file for Cobblemon Quests. This is a critical error and may cause crashes.", e);
+            LOGGER.warning("Failed to load config file for Cobblemon Quests. This is a critical error and may cause crashes. " + e);
         }
     }
 
@@ -72,7 +71,7 @@ public class CobblemonQuestsConfig {
                     Files.createFile(configPath);
                 }
             } catch (IOException e) {
-                LOGGER.log(Level.WARNING, "Failed to create config directory or file. Please report this with a log file to WinterWolfSV", e);
+                LOGGER.warning("Failed to create config directory or file. Please report this with a log file to WinterWolfSV " + e);
             }
         }
         try {
@@ -82,7 +81,7 @@ public class CobblemonQuestsConfig {
             defaultConfig.add("suppressWarnings: " + suppressWarnings);
             Files.write(configPath, defaultConfig);
         } catch (Exception e) {
-            LOGGER.log(Level.WARNING, "Failed to populate config file for Cobblemon Quests.", e);
+            LOGGER.warning("Failed to populate config file for Cobblemon Quests. " + e);
         }
     }
 

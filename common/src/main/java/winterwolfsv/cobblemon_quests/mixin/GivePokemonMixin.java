@@ -39,8 +39,7 @@ public abstract class GivePokemonMixin {
             pokemonProperties = PokemonPropertiesArgumentType.Companion.getPokemonProperties(context, "properties");
             pokemon = pokemonProperties.create();
         } catch (Exception e) {
-            CobblemonQuests.LOGGER.severe(() -> "Failed to create pokemon from properties. " + e.getMessage());
-
+            CobblemonQuests.LOGGER.warning("Failed to create pokemon from properties. " + e);
         }
         if (matcher.find()) {
             String value = matcher.group(0);
