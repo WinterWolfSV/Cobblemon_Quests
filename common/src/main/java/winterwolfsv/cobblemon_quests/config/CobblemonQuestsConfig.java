@@ -57,7 +57,6 @@ public class CobblemonQuestsConfig {
         } catch (Exception e) {
             LOGGER.log(Level.WARNING, "Failed to load config file for Cobblemon Quests. This is a critical error and may cause crashes.", e);
         }
-        return;
     }
 
     public static void save() {

@@ -7,9 +7,6 @@ public class ConfigCommandsFabric {
     public static void registerCommands() {
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
                 CobblemonQuestsConfigCommands.registerCommands(dispatcher));
-//        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
-//                CustomGivePokemonCommand.INSTANCE.register(dispatcher));
-//    }
     }
 }
 
