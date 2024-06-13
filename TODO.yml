@@ -1,0 +1,5 @@
+[Optional] Add support to select a few pokemon instead of only using categories.
+
+Config:
+    issues:
+        - Error on startup saying "failed to parse config line; ignoredPokemon"

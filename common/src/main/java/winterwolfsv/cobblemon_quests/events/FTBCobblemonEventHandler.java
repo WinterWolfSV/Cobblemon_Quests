@@ -48,7 +48,7 @@ public class FTBCobblemonEventHandler {
         CobblemonEvents.LEVEL_UP_EVENT.subscribe(Priority.LOWEST, this::pokemonLevelUp);
         CobblemonEvents.EVOLUTION_ACCEPTED.subscribe(Priority.LOWEST, this::pokemonEvolutionAccepted);
         CobblemonEvents.TRADE_COMPLETED.subscribe(Priority.LOWEST, this::pokemonTrade);
-        CobblemonEvents.POKEMON_RELEASED_EVENT_POST.subscribe(Priority.LOWEST, this::pokemonRelease);
+        CobblemonEvents.POKEMON_RELEASED_EVENT_PRE.subscribe(Priority.LOWEST, this::pokemonRelease);
         return this;
     }
 
@@ -58,10 +58,10 @@ public class FTBCobblemonEventHandler {
         }
     }
 
-    private Unit pokemonRelease(ReleasePokemonEvent.Post post) {
+    private Unit pokemonRelease(ReleasePokemonEvent.Pre pre) {
         try {
-            ServerPlayerEntity player = post.getPlayer();
-            Pokemon pokemon = post.getPokemon();
+            ServerPlayerEntity player = pre.getPlayer();
+            Pokemon pokemon = pre.getPokemon();
 
             if (this.pokemonTasks == null) {
                 this.pokemonTasks = ServerQuestFile.INSTANCE.collect(CobblemonTask.class);
@@ -82,9 +82,6 @@ public class FTBCobblemonEventHandler {
     /**
      * Player 1 gives pokemon 1 to player 2
      * Player 2 gives pokemon 2 to player 1
-     *
-     * @param tradeCompletedEvent
-     * @return
      */
     private Unit pokemonTrade(TradeCompletedEvent tradeCompletedEvent) {
         try {
@@ -148,22 +145,7 @@ public class FTBCobblemonEventHandler {
     }
 
     private Unit pokemonCatch(PokemonCapturedEvent pokemonCapturedEvent) {
-        try {
-            lastPokemonUuid = pokemonCapturedEvent.getPokemon().getUuid();
-
-            if (this.pokemonTasks == null) {
-                this.pokemonTasks = ServerQuestFile.INSTANCE.collect(CobblemonTask.class);
-            }
-            if (this.pokemonTasks.isEmpty()) return Unit.INSTANCE;
-
-            Team team = TeamManagerImpl.INSTANCE.getTeamForPlayer(pokemonCapturedEvent.getPlayer()).orElse(null);
-            if (team == null) return Unit.INSTANCE;
-            TeamData data = ServerQuestFile.INSTANCE.getOrCreateTeamData(team);
-            processTasksForTeam(data, pokemonCapturedEvent.getPokemon(), "catch", 1);
-        } catch (Exception e) {
-            CobblemonQuests.LOGGER.warning("Error processing catch event " + e.getMessage());
-        }
-        return Unit.INSTANCE;
+        return pokemonCatch(pokemonCapturedEvent.getPokemon(), pokemonCapturedEvent.getPlayer());
     }
 
     private EventResult entityKill(LivingEntity livingEntity, DamageSource damageSource) {
@@ -226,7 +208,24 @@ public class FTBCobblemonEventHandler {
     }
 
     private Unit pokemonStarterChosen(StarterChosenEvent starterChosenEvent) {
-        return pokemonCatch(starterChosenEvent.getPokemon(), starterChosenEvent.getPlayer());
+        try {
+            if (this.pokemonTasks == null) {
+                this.pokemonTasks = ServerQuestFile.INSTANCE.collect(CobblemonTask.class);
+            }
+            if (this.pokemonTasks.isEmpty()) return Unit.INSTANCE;
+            ServerPlayerEntity player = starterChosenEvent.getPlayer();
+            Pokemon pokemon = starterChosenEvent.getPokemon();
+
+            Team team = TeamManagerImpl.INSTANCE.getTeamForPlayer(player).orElse(null);
+            if (team == null) return Unit.INSTANCE;
+            TeamData data = ServerQuestFile.INSTANCE.getOrCreateTeamData(team);
+
+            processTasksForTeam(data, pokemon, "starter_chosen", 1);
+            processTasksForTeam(data, pokemon, "catch", 1);
+        } catch (Exception e) {
+            CobblemonQuests.LOGGER.warning("Error processing starter chosen event " + e.getMessage());
+        }
+        return Unit.INSTANCE;
     }
 
     private Unit pokemonEvolutionComplete(EvolutionCompleteEvent evolutionCompleteEvent) {
