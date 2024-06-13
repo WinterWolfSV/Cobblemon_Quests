@@ -30,13 +30,15 @@ public class CobblemonQuestsConfig {
         }
         try {
             for (String line : Files.readAllLines(configPath)) {
-                String[] split = line.split(": ");
+                String[] split = line.split(":");
                 if (split.length != 2) {
-                    LOGGER.warning("Failed to parse config line: " + line);
+                    if (!split[0].equals("ignoredPokemon")) {
+                        LOGGER.warning("Failed to parse config line: " + line);
+                    }
                     continue;
                 }
-                String key = split[0];
-                String value = split[1];
+                String key = split[0].trim();
+                String value = split[1].trim();
                 switch (key) {
                     case "configVersion":
                         if (Double.parseDouble(value) < configVersion)
@@ -47,7 +49,7 @@ public class CobblemonQuestsConfig {
                         suppressWarnings = Boolean.parseBoolean(value);
                         break;
                     case "ignoredPokemon":
-                        ignoredPokemon = new ArrayList<>(List.of(Arrays.stream(value.split(", ")).map(String::trim).toArray(String[]::new)));
+                        ignoredPokemon = new ArrayList<>(List.of(Arrays.stream(value.split(",")).map(String::trim).toArray(String[]::new)));
                         break;
                     default:
                         LOGGER.warning("Unknown config key: " + key);
