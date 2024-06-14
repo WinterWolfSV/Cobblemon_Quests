@@ -287,6 +287,23 @@ public class FTBCobblemonEventHandler {
         return Unit.INSTANCE;
     }
 
+    public void fossilRevivedHandler(ServerPlayerEntity player, Pokemon pokemon) {
+        try {
+            if (this.pokemonTasks == null) {
+                this.pokemonTasks = ServerQuestFile.INSTANCE.collect(CobblemonTask.class);
+            }
+            if (this.pokemonTasks.isEmpty()) return;
+
+            Team team = TeamManagerImpl.INSTANCE.getTeamForPlayer(player).orElse(null);
+            if (team == null) return;
+            TeamData data = ServerQuestFile.INSTANCE.getOrCreateTeamData(team);
+
+            processTasksForTeam(data, pokemon, "revive_fossil", 1, player);
+        } catch (Exception e) {
+            CobblemonQuests.LOGGER.warning("Error processing fossil revive event " + Arrays.toString(e.getStackTrace()));
+        }
+    }
+
     private void processTasksForTeam(TeamData data, Pokemon pokemon, String action, long amount, ServerPlayerEntity player) {
         try {
             for (CobblemonTask task : pokemonTasks) {

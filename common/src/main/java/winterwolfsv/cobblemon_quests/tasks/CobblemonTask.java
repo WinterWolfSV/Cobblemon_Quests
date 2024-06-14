@@ -170,7 +170,7 @@ public class CobblemonTask extends Task {
         assert MinecraftClient.getInstance().world != null;
         DynamicRegistryManager registryManager = MinecraftClient.getInstance().world.getRegistryManager();
 
-        List<String> actionList = Arrays.asList("catch", "defeat", "evolve", "kill", "level_up", "level_up_to", "release", "trade_away", "trade_for", "obtain", "select_starter");
+        List<String> actionList = Arrays.asList("catch", "defeat", "evolve", "kill", "level_up", "level_up_to", "release", "trade_away", "trade_for", "obtain", "select_starter","revive_fossil");
         addConfigList(config, "actions", actions, actionList, null, null);
 
         Function<String, String> pokemonNameProcessor = (name) -> name.split(":")[0] + ".species." + name.split(":")[1] + ".name";
@@ -306,7 +306,7 @@ public class CobblemonTask extends Task {
 
     public void CobblemonTaskIncrease(TeamData teamData, Pokemon pokemon, String executedAction, long progress, ServerPlayerEntity player) {
 
-        String[] obtainingMethods = {"catch", "evolve", "trade_for", "obtain"};
+        String[] obtainingMethods = {"catch", "evolve", "trade_for", "obtain","revive_fossil"};
         if (CobblemonQuestsConfig.ignoredPokemon.contains(pokemon.getSpecies().toString().toLowerCase())) return;
         if (actions.contains(executedAction) || (actions.contains("obtain") && Arrays.asList(obtainingMethods).contains(executedAction))) {
             LivingEntity targetEntity = pokemon.getOwnerPlayer() != null ? pokemon.getOwnerPlayer() : pokemon.getEntity();
