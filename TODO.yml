@@ -1,1 +1,2 @@
 [Optional] Add support to select a few pokemon instead of only using categories.
+[Severe] "WARNING: Error processing task for team Target entity is null. No player or pokemon could be found." when selecting starter
