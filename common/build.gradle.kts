@@ -16,7 +16,7 @@ loom.mixin {
 dependencies {
     minecraft("com.mojang:minecraft:1.20.1")
     mappings("net.fabricmc:yarn:${property("yarn_mappings")}:v2")
-    modCompileOnly("com.cobblemon:mod:1.4.0+1.20.1")
+    modCompileOnly("com.cobblemon:mod:1.5.3+1.20.1-SNAPSHOT")
 
 
     // alL fabric dependencies:

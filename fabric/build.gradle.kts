@@ -45,7 +45,7 @@ dependencies {
     "shadowCommon"(project(":common", "transformProductionFabric")) { isTransitive = false }
 
 
-    modImplementation("com.cobblemon:fabric:1.4.0+1.20.1-SNAPSHOT")
+    modImplementation("com.cobblemon:fabric:1.5.3+1.20.1-SNAPSHOT")
     modImplementation("curse.maven:ftb-quests-fabric-438496:4760285")
     modImplementation("curse.maven:ftb-teams-fabric-438497:4623115")
     modImplementation("curse.maven:ftb-library-fabric-438495:4720055")
