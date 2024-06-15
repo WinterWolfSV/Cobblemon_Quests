@@ -14,7 +14,7 @@ import static winterwolfsv.cobblemon_quests.CobblemonQuests.MOD_ID;
 public class Cobblemon_QuestsFabric implements ModInitializer {
     @Override
     public void onInitialize() {
-        Registry.register(Registries.ITEM, new Identifier(MOD_ID, "poke_ball_icon_1_1_10"), new Item(new Item.Settings()));
+        Registry.register(Registries.ITEM, new Identifier(MOD_ID, "v1.1.10"), new Item(new Item.Settings()));
         CobblemonQuests.init(FabricLoader.getInstance().getConfigDir().resolve(MOD_ID).resolve(MOD_ID + ".config"),true);
         ConfigCommandsFabric.registerCommands();
     }
