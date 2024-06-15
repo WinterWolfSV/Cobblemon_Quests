@@ -44,7 +44,7 @@ dependencies {
     "common"(project(":common", "namedElements")) { isTransitive = false }
     "shadowCommon"(project(":common", "transformProductionForge")) { isTransitive = false }
 
-    modImplementation("com.cobblemon:forge:1.4.0+1.20.1-SNAPSHOT")
+    modImplementation("com.cobblemon:forge:1.5.3+1.20.1-SNAPSHOT")
     implementation("thedarkcolour:kotlinforforge:4.4.0")
 
 
