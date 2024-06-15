@@ -18,9 +18,8 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKeys;
+import net.minecraft.util.registry.DynamicRegistryManager;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -50,8 +49,8 @@ public class CobblemonTask extends Task {
     public ArrayList<String> pokemonTypes = new ArrayList<>();
     public ArrayList<String> regions = new ArrayList<>();
 
-    public CobblemonTask(long id, Quest quest) {
-        super(id, quest);
+    public CobblemonTask(Quest quest) {
+        super(quest);
     }
 
     @Override
@@ -164,8 +163,8 @@ public class CobblemonTask extends Task {
 
     @Override
     @Environment(EnvType.CLIENT)
-    public void fillConfigGroup(ConfigGroup config) {
-        super.fillConfigGroup(config);
+    public void getConfig(ConfigGroup config) {
+        super.getConfig(config);
         // Asserts that the client is in a world, something that always should be true when the config is opened.
         assert MinecraftClient.getInstance().world != null;
         DynamicRegistryManager registryManager = MinecraftClient.getInstance().world.getRegistryManager();
@@ -201,10 +200,11 @@ public class CobblemonTask extends Task {
         addConfigList(config, "regions", regions, regionList, null, null);
 
         Function<String, String> biomeAndDimensionNameProcessor = (name) -> "(" + name.replace("_", " ").replace(":", ") ");
-        List<String> biomesList = new ArrayList<>(registryManager.get(RegistryKeys.BIOME).getEntrySet().stream().map(entry -> entry.getKey().getValue().toString()).toList());
+        List<String> biomesList = new ArrayList<>(registryManager.get(Registry.BIOME_KEY).getEntrySet().stream().map(entry -> entry.getKey().getValue().toString()).toList());
         addConfigList(config, "biomes", biomes, biomesList, null, biomeAndDimensionNameProcessor);
 
-        List<String> dimensionsList = new ArrayList<>(registryManager.get(RegistryKeys.DIMENSION_TYPE).getEntrySet().stream().map(entry -> entry.getKey().getValue().toString()).toList());
+//        List<String> dimensionsList = new ArrayList<>(registryManager.get(RegistryKeys.DIMENSION_TYPE).getEntrySet().stream().map(entry -> entry.getKey().getValue().toString()).toList());
+        List<String> dimensionsList = new ArrayList<>(registryManager.get(Registry.DIMENSION_TYPE_KEY).getEntrySet().stream().map(entry -> entry.getKey().getValue().toString()).toList());
         dimensionsList.remove("minecraft:overworld_caves");
         addConfigList(config, "dimensions", dimensions, dimensionsList, null, biomeAndDimensionNameProcessor);
 
@@ -286,7 +286,7 @@ public class CobblemonTask extends Task {
     }
 
     public Icon getIconFromIdentifier(Identifier identifier) {
-        ItemStack itemStack = Registries.ITEM.get(identifier).getDefaultStack();
+        ItemStack itemStack = Registry.ITEM.get(identifier).getDefaultStack();
         if (itemStack.isEmpty()) {
             return pokeBallIcon;
         } else {
@@ -295,7 +295,7 @@ public class CobblemonTask extends Task {
     }
 
     public Icon getPokemonIcon(Identifier pokemon) {
-        Item pokemonModelItem = Registries.ITEM.get(new Identifier("cobblemon", "pokemon_model"));
+        Item pokemonModelItem = Registry.ITEM.get(new Identifier("cobblemon", "pokemon_model"));
         NbtCompound nbt = new NbtCompound();
         nbt.putString("species", pokemon.toString());
         pokemonModelItem.getDefaultStack().setNbt(nbt);
@@ -318,7 +318,7 @@ public class CobblemonTask extends Task {
 
             // Check region
             if (!regions.isEmpty()) {
-                if (!regions.contains(pokemon.getSpecies().getLabels().toArray()[0].toString())) {
+                if (!regions.contains(pokemon.getSpecies().getLabels$common().toArray()[0].toString())) {
                     return;
                 }
             }

@@ -28,16 +28,17 @@ public class CobblemonQuestsConfigCommands {
                         .then(argument("suppress_warnings", BoolArgumentType.bool())
                                 .executes(context -> {
                                     if (Objects.equals(CobblemonQuestsConfig.suppressWarnings, BoolArgumentType.getBool(context, "suppress_warnings"))) {
-                                        context.getSource().sendFeedback(() -> Text.of("Suppress Warnings is already set to: " + CobblemonQuestsConfig.suppressWarnings), true);
+//                                        context.getSource().sendFeedback(() -> Text.of("Suppress Warnings is already set to: " + CobblemonQuestsConfig.suppressWarnings), true);
+                                        context.getSource().sendFeedback(Text.of("Suppress Warnings is already set to: " + CobblemonQuestsConfig.suppressWarnings), false);
                                         return 0;
                                     }
                                     CobblemonQuestsConfig.suppressWarnings = BoolArgumentType.getBool(context, "suppress_warnings");
                                     CobblemonQuestsConfig.save();
-                                    context.getSource().sendFeedback(() -> Text.of("Suppress Warnings set to: " + CobblemonQuestsConfig.suppressWarnings), true);
+                                    context.getSource().sendFeedback(Text.of("Suppress Warnings set to: " + CobblemonQuestsConfig.suppressWarnings), true);
                                     return 1;
                                 }))
                         .executes(context -> {
-                            context.getSource().sendFeedback(() -> Text.of("Suppress Warnings is currently set to: " + CobblemonQuestsConfig.suppressWarnings), false);
+                            context.getSource().sendFeedback(Text.of("Suppress Warnings is currently set to: " + CobblemonQuestsConfig.suppressWarnings), false);
                             return 1;
                         })
                 )
@@ -64,26 +65,26 @@ public class CobblemonQuestsConfigCommands {
                                                     String pokemon = StringArgumentType.getString(context, "pokemon").toLowerCase();
                                                     if (action.equals("add")) {
                                                         if (CobblemonQuestsConfig.ignoredPokemon.contains(pokemon)) {
-                                                            context.getSource().sendFeedback(() -> Text.of("Pokémon " + pokemon + " is already blacklisted."), true);
+                                                            context.getSource().sendFeedback(Text.of("Pokémon " + pokemon + " is already blacklisted."), true);
                                                             return 0;
                                                         }
                                                         CobblemonQuestsConfig.ignoredPokemon.add(pokemon);
                                                         CobblemonQuestsConfig.save();
-                                                        context.getSource().sendFeedback(() -> Text.of("Pokémon " + pokemon + " has been blacklisted."), true);
+                                                        context.getSource().sendFeedback(Text.of("Pokémon " + pokemon + " has been blacklisted."), true);
                                                     } else if (action.equals("remove")) {
                                                         if (!CobblemonQuestsConfig.ignoredPokemon.contains(pokemon)) {
-                                                            context.getSource().sendFeedback(() -> Text.of("Pokémon " + pokemon + " is not blacklisted."), true);
+                                                            context.getSource().sendFeedback( Text.of("Pokémon " + pokemon + " is not blacklisted."), true);
                                                             return 0;
                                                         }
                                                         CobblemonQuestsConfig.ignoredPokemon.remove(pokemon);
                                                         CobblemonQuestsConfig.save();
-                                                        context.getSource().sendFeedback(() -> Text.of("Pokémon " + pokemon + " has been removed from the blacklist."), true);
+                                                        context.getSource().sendFeedback(Text.of("Pokémon " + pokemon + " has been removed from the blacklist."), true);
                                                     }
                                                     return 1;
                                                 }
                                         )))
                         .executes(context -> {
-                            context.getSource().sendFeedback(() -> Text.of("Currently blacklisted Pokémon: " + CobblemonQuestsConfig.ignoredPokemon), false);
+                            context.getSource().sendFeedback(Text.of("Currently blacklisted Pokémon: " + CobblemonQuestsConfig.ignoredPokemon), false);
                             return 1;
                         })
                 )
