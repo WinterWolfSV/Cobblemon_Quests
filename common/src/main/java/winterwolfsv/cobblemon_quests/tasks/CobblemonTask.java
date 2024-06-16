@@ -23,6 +23,7 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import winterwolfsv.cobblemon_quests.CobblemonQuests;
 import winterwolfsv.cobblemon_quests.config.CobblemonQuestsConfig;
 
 import java.util.*;
@@ -169,7 +170,7 @@ public class CobblemonTask extends Task {
         assert MinecraftClient.getInstance().world != null;
         DynamicRegistryManager registryManager = MinecraftClient.getInstance().world.getRegistryManager();
 
-        List<String> actionList = Arrays.asList("catch", "defeat", "evolve", "kill", "level_up", "level_up_to", "release", "trade_away", "trade_for", "obtain", "select_starter","revive_fossil");
+        List<String> actionList = Arrays.asList("catch", "defeat", "evolve", "kill", "level_up", "level_up_to", "obtain", "select_starter");
         addConfigList(config, "actions", actions, actionList, null, null);
 
         Function<String, String> pokemonNameProcessor = (name) -> name.split(":")[0] + ".species." + name.split(":")[1] + ".name";
@@ -219,7 +220,7 @@ public class CobblemonTask extends Task {
                 .name(s -> Text.translatable(nameProcessor == null ? MOD_ID + "." + listName + "." + s : nameProcessor.apply(s)))
                 .icon(s -> iconProcessor == null ? pokeBallIcon : iconProcessor.apply(new Identifier(s)))
                 .create();
-        config.addList(listName, listData, new EnumConfig<>(nameMap), optionsList.get(optionsList.size()-1)).setNameKey(MOD_ID + ".task." + listName);
+        config.addList(listName, listData, new EnumConfig<>(nameMap), optionsList.get(optionsList.size() - 1)).setNameKey(MOD_ID + ".task." + listName);
     }
 
     @Override
@@ -250,13 +251,13 @@ public class CobblemonTask extends Task {
         } else {
             for (String pokemon : pokemons) {
                 titleBuilder.append(Text.translatable("cobblemon.species." + pokemon.split(":")[1] + ".name").getString()).append(" ");
-                if(pokemons.indexOf(pokemon) != pokemons.size() - 1) {
+                if (pokemons.indexOf(pokemon) != pokemons.size() - 1) {
                     titleBuilder.append("or ");
                 }
             }
         }
         for (String pokeballUsed : pokeBallsUsed) {
-            if(pokeBallsUsed.indexOf(pokeballUsed) == 0) {
+            if (pokeBallsUsed.indexOf(pokeballUsed) == 0) {
                 titleBuilder.append("using a ");
             } else {
                 titleBuilder.append("or ");
@@ -305,98 +306,101 @@ public class CobblemonTask extends Task {
     }
 
     public void CobblemonTaskIncrease(TeamData teamData, Pokemon pokemon, String executedAction, long progress, ServerPlayerEntity player) {
-
-        String[] obtainingMethods = {"catch", "evolve", "trade_for", "obtain","revive_fossil"};
-        if (CobblemonQuestsConfig.ignoredPokemon.contains(pokemon.getSpecies().toString().toLowerCase())) return;
-        if (actions.contains(executedAction) || (actions.contains("obtain") && Arrays.asList(obtainingMethods).contains(executedAction))) {
-            LivingEntity targetEntity = pokemon.getOwnerPlayer() != null ? pokemon.getOwnerPlayer() : pokemon.getEntity();
-            if (targetEntity == null && player != null) {
-                targetEntity = player;
-            } else if (targetEntity == null) {
-                throw new NullPointerException("The target entity is null. No player or pokemon entity was found. This will cause the quest to not update properly.\nExecuted action: " + executedAction);
-            }
-
-            // Check region
-            if (!regions.isEmpty()) {
-                if (!regions.contains(pokemon.getSpecies().getLabels$common().toArray()[0].toString())) {
-                    return;
+        try {
+            String[] obtainingMethods = {"catch", "evolve", "obtain"};
+            if (CobblemonQuestsConfig.ignoredPokemon.contains(pokemon.getSpecies().toString().toLowerCase())) return;
+            if (actions.contains(executedAction) || (actions.contains("obtain") && Arrays.asList(obtainingMethods).contains(executedAction))) {
+                LivingEntity targetEntity = pokemon.getOwnerPlayer() != null ? pokemon.getOwnerPlayer() : pokemon.getEntity();
+                if (targetEntity == null && player != null) {
+                    targetEntity = player;
+                } else if (targetEntity == null) {
+                    throw new NullPointerException("The target entity is null. No player or pokemon entity was found. This will cause the quest to not update properly.\nExecuted action: " + executedAction);
                 }
-            }
 
-            // Check the time of action
-            if (!(timeMin == 0 && timeMax == 24000)) {
-                long timeOfDay = targetEntity.getEntityWorld().getTimeOfDay();
-                long actualMin = timeMin;
-                long actualMax = timeMax;
-
-                // Adjusts the time to account for the 24000 cycle
-                if (timeMin > timeMax) {
-                    actualMax = timeMax + 24000;
-                    if (timeOfDay < timeMin) {
-                        timeOfDay += 24000;
+                // Check region
+                if (!regions.isEmpty()) {
+                    if (!regions.contains(pokemon.getSpecies().getLabels$common().toArray()[0].toString())) {
+                        return;
                     }
                 }
-                if (timeOfDay < actualMin || timeOfDay >= actualMax) {
-                    return;
+
+                // Check the time of action
+                if (!(timeMin == 0 && timeMax == 24000)) {
+                    long timeOfDay = targetEntity.getEntityWorld().getTimeOfDay();
+                    long actualMin = timeMin;
+                    long actualMax = timeMax;
+
+                    // Adjusts the time to account for the 24000 cycle
+                    if (timeMin > timeMax) {
+                        actualMax = timeMax + 24000;
+                        if (timeOfDay < timeMin) {
+                            timeOfDay += 24000;
+                        }
+                    }
+                    if (timeOfDay < actualMin || timeOfDay >= actualMax) {
+                        return;
+                    }
+                }
+
+                if (!pokeBallsUsed.isEmpty()) {
+                    if (!pokeBallsUsed.contains(pokemon.getCaughtBall().getName().toString())) {
+                        return;
+                    }
+                }
+
+                // Check dimension
+                if (!dimensions.isEmpty()) {
+                    if (!dimensions.contains(targetEntity.getEntityWorld().getRegistryKey().getValue().toString())) {
+                        return;
+                    }
+                }
+
+                // Check biome
+                if (!biomes.isEmpty()) {
+                    if (!biomes.contains(targetEntity.getEntityWorld().getBiome(targetEntity.getBlockPos()).getKey().get().getValue().toString())) {
+                        return;
+                    }
+                }
+
+                // Check gender
+                if (!genders.isEmpty()) {
+                    if (!genders.contains(pokemon.getGender().toString().toLowerCase())) {
+                        return;
+                    }
+                }
+
+                // Check form
+                if (!forms.isEmpty()) {
+                    if (!forms.contains(pokemon.getForm().getName().toLowerCase())) {
+                        return;
+                    }
+                }
+
+                // Check type
+                if (!pokemonTypes.isEmpty()) {
+                    List<String> types = new ArrayList<>();
+                    pokemon.getTypes().iterator().forEachRemaining(type -> {
+                        String typeName = type.getName().toLowerCase();
+                        if (pokemonTypes.contains(typeName)) types.add(typeName);
+                    });
+                    if (types.isEmpty()) {
+                        return;
+                    }
+                }
+
+                // Check shiny
+                if (!pokemon.getShiny() && shiny) return;
+
+                boolean shouldAddProgress = pokemons.stream().anyMatch(p -> p.split(":").length > 1 &&
+                        p.split(":")[1].equals(pokemon.getSpecies().toString())) ||
+                        pokemons.isEmpty();
+
+                if (shouldAddProgress) {
+                    teamData.addProgress(this, progress);
                 }
             }
-
-            if (!pokeBallsUsed.isEmpty()) {
-                if (!pokeBallsUsed.contains(pokemon.getCaughtBall().getName().toString())) {
-                    return;
-                }
-            }
-
-            // Check dimension
-            if (!dimensions.isEmpty()) {
-                if (!dimensions.contains(targetEntity.getEntityWorld().getRegistryKey().getValue().toString())) {
-                    return;
-                }
-            }
-
-            // Check biome
-            if (!biomes.isEmpty()) {
-                if (!biomes.contains(targetEntity.getEntityWorld().getBiome(targetEntity.getBlockPos()).getKey().get().getValue().toString())) {
-                    return;
-                }
-            }
-
-            // Check gender
-            if (!genders.isEmpty()) {
-                if (!genders.contains(pokemon.getGender().toString().toLowerCase())) {
-                    return;
-                }
-            }
-
-            // Check form
-            if (!forms.isEmpty()) {
-                if (!forms.contains(pokemon.getForm().getName().toLowerCase())) {
-                    return;
-                }
-            }
-
-            // Check type
-            if (!pokemonTypes.isEmpty()) {
-                List<String> types = new ArrayList<>();
-                pokemon.getTypes().iterator().forEachRemaining(type -> {
-                    String typeName = type.getName().toLowerCase();
-                    if (pokemonTypes.contains(typeName)) types.add(typeName);
-                });
-                if (types.isEmpty()) {
-                    return;
-                }
-            }
-
-            // Check shiny
-            if (!pokemon.getShiny() && shiny) return;
-
-            boolean shouldAddProgress = pokemons.stream().anyMatch(p -> p.split(":").length > 1 &&
-                    p.split(":")[1].equals(pokemon.getSpecies().toString())) ||
-                    pokemons.isEmpty();
-
-            if (shouldAddProgress) {
-                teamData.addProgress(this, progress);
-            }
+        } catch (Exception e) {
+            CobblemonQuests.LOGGER.warning("Failed to increase progress for task. " + Arrays.toString(e.getStackTrace()));
         }
     }
 }

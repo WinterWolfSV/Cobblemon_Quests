@@ -6,11 +6,9 @@ import com.cobblemon.mod.common.api.events.CobblemonEvents;
 import com.cobblemon.mod.common.api.events.battles.BattleVictoryEvent;
 import com.cobblemon.mod.common.api.events.pokemon.LevelUpEvent;
 import com.cobblemon.mod.common.api.events.pokemon.PokemonCapturedEvent;
-//import com.cobblemon.mod.common.api.events.pokemon.TradeCompletedEvent;
 import com.cobblemon.mod.common.api.events.pokemon.evolution.EvolutionAcceptedEvent;
 import com.cobblemon.mod.common.api.events.pokemon.evolution.EvolutionCompleteEvent;
 import com.cobblemon.mod.common.api.events.starter.StarterChosenEvent;
-//import com.cobblemon.mod.common.api.events.storage.ReleasePokemonEvent;
 import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import dev.architectury.event.EventResult;
@@ -48,8 +46,6 @@ public class FTBCobblemonEventHandler {
         CobblemonEvents.EVOLUTION_COMPLETE.subscribe(Priority.LOWEST, this::pokemonEvolutionComplete);
         CobblemonEvents.LEVEL_UP_EVENT.subscribe(Priority.LOWEST, this::pokemonLevelUp);
         CobblemonEvents.EVOLUTION_ACCEPTED.subscribe(Priority.LOWEST, this::pokemonEvolutionAccepted);
-//        CobblemonEvents.TRADE_COMPLETED.subscribe(Priority.LOWEST, this::pokemonTrade);
-//        CobblemonEvents.POKEMON_RELEASED_EVENT_PRE.subscribe(Priority.LOWEST, this::pokemonRelease);
         return this;
     }
 
@@ -58,59 +54,6 @@ public class FTBCobblemonEventHandler {
             pokemonTasks = null;
         }
     }
-
-//    private Unit pokemonRelease(ReleasePokemonEvent.Pre pre) {
-//        try {
-//            ServerPlayerEntity player = pre.getPlayer();
-//            Pokemon pokemon = pre.getPokemon();
-//
-//            if (this.pokemonTasks == null) {
-//                this.pokemonTasks = ServerQuestFile.INSTANCE.collect(CobblemonTask.class);
-//            }
-//            if (this.pokemonTasks.isEmpty()) return Unit.INSTANCE;
-//
-//            Team team = TeamManager.INSTANCE.getPlayerTeam(player);
-//            if (team == null) return Unit.INSTANCE;
-//            TeamData data = ServerQuestFile.INSTANCE.getData(team);
-//            processTasksForTeam(data, pokemon, "release", 1, null);
-//
-//        } catch (Exception e) {
-//            CobblemonQuests.LOGGER.warning("Error processing release event " + Arrays.toString(e.getStackTrace()));
-//        }
-//        return Unit.INSTANCE;
-//    }
-
-    /**
-     * Player 1 gives pokemon 1 to player 2
-     * Player 2 gives pokemon 2 to player 1
-     */
-//    private Unit pokemonTrade(TradeCompletedEvent tradeCompletedEvent) {
-//        try {
-//            UUID playerUuid1 = tradeCompletedEvent.getTradeParticipant1().getUuid();
-//            UUID playerUuid2 = tradeCompletedEvent.getTradeParticipant2().getUuid();
-//            Pokemon pokemonGivenByPlayer1 = tradeCompletedEvent.getTradeParticipant2Pokemon();
-//            Pokemon pokemonGivenByPlayer2 = tradeCompletedEvent.getTradeParticipant1Pokemon();
-//
-//            if (this.pokemonTasks == null) {
-//                this.pokemonTasks = ServerQuestFile.INSTANCE.collect(CobblemonTask.class);
-//            }
-//
-//            Team teamPlayer1 = TeamManager.INSTANCE.getTeamByID(playerUuid1);
-//            Team teamPlayer2 = TeamManager.INSTANCE.getTeamByID(playerUuid2);
-//
-//            TeamData dataPlayer1 = ServerQuestFile.INSTANCE.getData(teamPlayer1);
-//            TeamData dataPlayer2 = ServerQuestFile.INSTANCE.getData(teamPlayer2);
-//
-//            processTasksForTeam(dataPlayer1, pokemonGivenByPlayer2, "trade_for", 1, null);
-//            processTasksForTeam(dataPlayer1, pokemonGivenByPlayer1, "trade_away", 1, null);
-//            processTasksForTeam(dataPlayer2, pokemonGivenByPlayer1, "trade_for", 1, null);
-//            processTasksForTeam(dataPlayer2, pokemonGivenByPlayer2, "trade_away", 1, null);
-//        } catch (Exception e) {
-//            CobblemonQuests.LOGGER.warning("Error processing trade event " + Arrays.toString(e.getStackTrace()));
-//        }
-//        return Unit.INSTANCE;
-//    }
-
 
     private Unit pokemonBattleVictory(BattleVictoryEvent battleVictoryEvent) {
         try {
@@ -285,23 +228,6 @@ public class FTBCobblemonEventHandler {
             CobblemonQuests.LOGGER.warning("Error processing level up event " + Arrays.toString(e.getStackTrace()));
         }
         return Unit.INSTANCE;
-    }
-
-    public void fossilRevivedHandler(ServerPlayerEntity player, Pokemon pokemon) {
-        try {
-            if (this.pokemonTasks == null) {
-                this.pokemonTasks = ServerQuestFile.INSTANCE.collect(CobblemonTask.class);
-            }
-            if (this.pokemonTasks.isEmpty()) return;
-
-            Team team = TeamManager.INSTANCE.getPlayerTeam(player);
-            if (team == null) return;
-            TeamData data = ServerQuestFile.INSTANCE.getData(team);
-
-            processTasksForTeam(data, pokemon, "revive_fossil", 1, player);
-        } catch (Exception e) {
-            CobblemonQuests.LOGGER.warning("Error processing fossil revive event " + Arrays.toString(e.getStackTrace()));
-        }
     }
 
     private void processTasksForTeam(TeamData data, Pokemon pokemon, String action, long amount, ServerPlayerEntity player) {
