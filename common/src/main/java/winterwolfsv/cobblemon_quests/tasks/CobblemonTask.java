@@ -168,6 +168,7 @@ public class CobblemonTask extends Task {
         Function<String, String> pokemonNameProcessor = (name) -> name.split(":")[0] + ".species." + name.split(":")[1] + ".name";
         List<String> pokemonList = new ArrayList<>(PokemonSpecies.INSTANCE.getSpecies().stream().map(species -> species.resourceIdentifier.toString()).toList());
         Collections.sort(pokemonList);
+
         addConfigList(config, "pokemons", pokemons, pokemonList, this::getPokemonIcon, pokemonNameProcessor);
         config.addLong("amount", amount, v -> amount = v, 1L, 1L, Long.MAX_VALUE).setNameKey(MOD_ID + ".task.amount");
         config.addBool("shiny", shiny, v -> shiny = v, false).setNameKey(MOD_ID + ".task.shiny");
@@ -347,16 +348,13 @@ public class CobblemonTask extends Task {
                 }
             }
 
-            // Check level up to event
-
-
             // Check shiny
             if (!pokemon.getShiny() && shiny) return;
             boolean shouldAddProgress = pokemons.stream().anyMatch(p -> p.split(":").length > 1 && p.split(":")[1].equals(pokemon.getSpecies().toString())) || pokemons.isEmpty();
 
             if (shouldAddProgress) {
                 if (executedAction.equals("level_up_to")) {
-                    if(teamData.getProgress(this) < progress){
+                    if (teamData.getProgress(this) < progress) {
                         teamData.setProgress(this, progress);
                     }
                     return;
