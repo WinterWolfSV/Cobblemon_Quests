@@ -12,17 +12,16 @@ import dev.ftb.mods.ftbquests.quest.task.Task;
 import dev.ftb.mods.ftbquests.quest.task.TaskType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
 import winterwolfsv.cobblemon_quests.config.CobblemonQuestsConfig;
 
 import java.util.*;
@@ -62,8 +61,8 @@ public class CobblemonTask extends Task {
     }
 
     @Override
-    public void writeData(NbtCompound nbt) {
-        super.writeData(nbt);
+    public void writeData(CompoundTag nbt, HolderLookup.Provider provider) {
+        super.writeData(nbt, provider);
         nbt.putLong("amount", amount);
         nbt.putBoolean("shiny", shiny);
         nbt.putLong("time_min", timeMin);
@@ -80,8 +79,8 @@ public class CobblemonTask extends Task {
     }
 
     @Override
-    public void readData(NbtCompound nbt) {
-        super.readData(nbt);
+    public void readData(CompoundTag nbt, HolderLookup.Provider provider) {
+        super.readData(nbt, provider);
         amount = nbt.getLong("amount");
         shiny = nbt.getBoolean("shiny");
         timeMin = nbt.getLong("time_min");
@@ -111,39 +110,39 @@ public class CobblemonTask extends Task {
     }
 
     @Override
-    public void writeNetData(PacketByteBuf buffer) {
+    public void writeNetData(RegistryFriendlyByteBuf buffer) {
         super.writeNetData(buffer);
         buffer.writeLong(amount);
         buffer.writeBoolean(shiny);
         buffer.writeLong(timeMin);
         buffer.writeLong(timeMax);
-        buffer.writeString(writeArrayList(pokemons), Short.MAX_VALUE);
-        buffer.writeString(writeArrayList(actions), Short.MAX_VALUE);
-        buffer.writeString(writeArrayList(biomes), Short.MAX_VALUE);
-        buffer.writeString(writeArrayList(dimensions), Short.MAX_VALUE);
-        buffer.writeString(writeArrayList(forms), Short.MAX_VALUE);
-        buffer.writeString(writeArrayList(genders), Short.MAX_VALUE);
-        buffer.writeString(writeArrayList(pokeBallsUsed), Short.MAX_VALUE);
-        buffer.writeString(writeArrayList(pokemonTypes), Short.MAX_VALUE);
-        buffer.writeString(writeArrayList(regions), Short.MAX_VALUE);
+        buffer.writeUtf(writeArrayList(pokemons), Short.MAX_VALUE);
+        buffer.writeUtf(writeArrayList(actions), Short.MAX_VALUE);
+        buffer.writeUtf(writeArrayList(biomes), Short.MAX_VALUE);
+        buffer.writeUtf(writeArrayList(dimensions), Short.MAX_VALUE);
+        buffer.writeUtf(writeArrayList(forms), Short.MAX_VALUE);
+        buffer.writeUtf(writeArrayList(genders), Short.MAX_VALUE);
+        buffer.writeUtf(writeArrayList(pokeBallsUsed), Short.MAX_VALUE);
+        buffer.writeUtf(writeArrayList(pokemonTypes), Short.MAX_VALUE);
+        buffer.writeUtf(writeArrayList(regions), Short.MAX_VALUE);
     }
 
     @Override
-    public void readNetData(PacketByteBuf buffer) {
+    public void readNetData(RegistryFriendlyByteBuf buffer) {
         super.readNetData(buffer);
         amount = buffer.readLong();
         shiny = buffer.readBoolean();
         timeMin = buffer.readLong();
         timeMax = buffer.readLong();
-        pokemons = readArrayList(buffer.readString(Short.MAX_VALUE));
-        actions = readArrayList(buffer.readString(Short.MAX_VALUE));
-        biomes = readArrayList(buffer.readString(Short.MAX_VALUE));
-        dimensions = readArrayList(buffer.readString(Short.MAX_VALUE));
-        forms = readArrayList(buffer.readString(Short.MAX_VALUE));
-        genders = readArrayList(buffer.readString(Short.MAX_VALUE));
-        pokeBallsUsed = readArrayList(buffer.readString(Short.MAX_VALUE));
-        pokemonTypes = readArrayList(buffer.readString(Short.MAX_VALUE));
-        regions = readArrayList(buffer.readString(Short.MAX_VALUE));
+        pokemons = readArrayList(buffer.readUtf(Short.MAX_VALUE));
+        actions = readArrayList(buffer.readUtf(Short.MAX_VALUE));
+        biomes = readArrayList(buffer.readUtf(Short.MAX_VALUE));
+        dimensions = readArrayList(buffer.readUtf(Short.MAX_VALUE));
+        forms = readArrayList(buffer.readUtf(Short.MAX_VALUE));
+        genders = readArrayList(buffer.readUtf(Short.MAX_VALUE));
+        pokeBallsUsed = readArrayList(buffer.readUtf(Short.MAX_VALUE));
+        pokemonTypes = readArrayList(buffer.readUtf(Short.MAX_VALUE));
+        regions = readArrayList(buffer.readUtf(Short.MAX_VALUE));
     }
 
     public String writeArrayList(ArrayList<String> list) {
@@ -161,8 +160,8 @@ public class CobblemonTask extends Task {
     public void fillConfigGroup(ConfigGroup config) {
         super.fillConfigGroup(config);
         // Asserts that the client is in a world, something that always should be true when the config is opened.
-        assert MinecraftClient.getInstance().world != null;
-        DynamicRegistryManager registryManager = MinecraftClient.getInstance().world.getRegistryManager();
+        assert Minecraft.getInstance().level != null;
+        RegistryAccess registryManager = Minecraft.getInstance().level.registryAccess();
         List<String> actionList = Arrays.asList("catch", "defeat", "evolve", "kill", "level_up", "level_up_to", "release", "trade_away", "trade_for", "obtain", "select_starter", "revive_fossil");
         addConfigList(config, "actions", actions, actionList, null, null);
         Function<String, String> pokemonNameProcessor = (name) -> name.split(":")[0] + ".species." + name.split(":")[1] + ".name";
@@ -186,48 +185,48 @@ public class CobblemonTask extends Task {
         List<String> regionList = Arrays.asList("gen1", "gen2", "gen3", "gen4", "gen5", "gen6", "gen7", "gen8", "gen9");
         addConfigList(config, "regions", regions, regionList, null, null);
         Function<String, String> biomeAndDimensionNameProcessor = (name) -> "(" + name.replace("_", " ").replace(":", ") ");
-        List<String> biomesList = new ArrayList<>(registryManager.get(RegistryKeys.BIOME).getEntrySet().stream().map(entry -> entry.getKey().getValue().toString()).toList());
+        List<String> biomesList = new ArrayList<>(registryManager.registryOrThrow(BuiltInRegistries.BIOME_SOURCE.key()).entrySet().stream().map(entry -> entry.getKey().toString()).toList());
         addConfigList(config, "biomes", biomes, biomesList, null, biomeAndDimensionNameProcessor);
-        List<String> dimensionsList = new ArrayList<>(registryManager.get(RegistryKeys.DIMENSION_TYPE).getEntrySet().stream().map(entry -> entry.getKey().getValue().toString()).toList());
-        dimensionsList.remove("minecraft:overworld_caves");
-        addConfigList(config, "dimensions", dimensions, dimensionsList, null, biomeAndDimensionNameProcessor);
+//        List<String> dimensionsList = new ArrayList<>(registryManager.get(RegistryKeys.DIMENSION_TYPE).getEntrySet().stream().map(entry -> entry.getKey().getValue().toString()).toList());
+//        dimensionsList.remove("minecraft:overworld_caves");
+//        addConfigList(config, "dimensions", dimensions, dimensionsList, null, biomeAndDimensionNameProcessor);
         config.addLong("time_min", timeMin, v -> timeMin = v, 0L, 0L, 24000L).setNameKey(MOD_ID + ".task.time_min");
         config.addLong("time_max", timeMax, v -> timeMax = v, 24000L, 0L, 24000L).setNameKey(MOD_ID + ".task.time_max");
     }
 
-    private void addConfigList(ConfigGroup config, String listName, List<String> listData, List<String> optionsList, Function<Identifier, Icon> iconProcessor, Function<String, String> nameProcessor) {
-        NameMap<String> nameMap = NameMap.of(optionsList.get(0), optionsList).id(s -> s).name(s -> Text.translatable(nameProcessor == null ? MOD_ID + "." + listName + "." + s : nameProcessor.apply(s))).icon(s -> iconProcessor == null ? pokeBallIcon : iconProcessor.apply(new Identifier(s))).create();
+    private void addConfigList(ConfigGroup config, String listName, List<String> listData, List<String> optionsList, Function<ResourceLocation, Icon> iconProcessor, Function<String, String> nameProcessor) {
+        NameMap<String> nameMap = NameMap.of(optionsList.get(0), optionsList).id(s -> s).name(s -> Component.translatable(nameProcessor == null ? MOD_ID + "." + listName + "." + s : nameProcessor.apply(s))).icon(s -> iconProcessor == null ? pokeBallIcon : iconProcessor.apply(ResourceLocation.parse(s))).create();
         config.addList(listName, listData, new EnumConfig<>(nameMap), optionsList.get(optionsList.size() - 1)).setNameKey(MOD_ID + ".task." + listName);
     }
 
     @Override
     @Environment(EnvType.CLIENT)
-    public Text getAltTitle() {
+    public Component getAltTitle() {
         StringBuilder titleBuilder = new StringBuilder();
         for (String action : actions) {
-            titleBuilder.append(Text.translatable("cobblemon_quests.actions." + action).getString()).append(" ");
+            titleBuilder.append(Component.translatable("cobblemon_quests.actions." + action).getString()).append(" ");
         }
         titleBuilder.append(amount).append("x ");
         if (shiny) {
-            titleBuilder.append(Text.translatable("cobblemon_quests.task.shiny").getString()).append(" ");
+            titleBuilder.append(Component.translatable("cobblemon_quests.task.shiny").getString()).append(" ");
         }
         for (String gender : genders) {
-            titleBuilder.append(Text.translatable("cobblemon_quests.genders." + gender).getString()).append(" ");
+            titleBuilder.append(Component.translatable("cobblemon_quests.genders." + gender).getString()).append(" ");
         }
         for (String form : forms) {
-            titleBuilder.append(Text.translatable("cobblemon_quests.forms." + form).getString()).append(" ");
+            titleBuilder.append(Component.translatable("cobblemon_quests.forms." + form).getString()).append(" ");
         }
         for (String region : regions) {
-            titleBuilder.append(Text.translatable("cobblemon_quests.regions." + region).getString()).append(" ");
+            titleBuilder.append(Component.translatable("cobblemon_quests.regions." + region).getString()).append(" ");
         }
         for (String pokemonType : pokemonTypes) {
-            titleBuilder.append(Text.translatable("cobblemon.type." + pokemonType).getString()).append(" ");
+            titleBuilder.append(Component.translatable("cobblemon.type." + pokemonType).getString()).append(" ");
         }
         if (pokemons.isEmpty()) {
-            titleBuilder.append(Text.translatable("cobblemon_quests.task.pokemons").getString()).append(" ");
+            titleBuilder.append(Component.translatable("cobblemon_quests.task.pokemons").getString()).append(" ");
         } else {
             for (String pokemon : pokemons) {
-                titleBuilder.append(Text.translatable("cobblemon.species." + pokemon.split(":")[1] + ".name").getString()).append(" ");
+                titleBuilder.append(Component.translatable("cobblemon.species." + pokemon.split(":")[1] + ".name").getString()).append(" ");
                 if (pokemons.indexOf(pokemon) != pokemons.size() - 1) {
                     titleBuilder.append("or ");
                 }
@@ -239,7 +238,7 @@ public class CobblemonTask extends Task {
             } else {
                 titleBuilder.append("or ");
             }
-            titleBuilder.append(Text.translatable("item." + pokeballUsed.replace(":", ".")).getString()).append(" ");
+            titleBuilder.append(Component.translatable("item." + pokeballUsed.replace(":", ".")).getString()).append(" ");
         }
         for (String dimension : dimensions) {
             titleBuilder.append("in ").append(dimension.split(":")[1].replace("_", " ")).append(" ");
@@ -250,7 +249,8 @@ public class CobblemonTask extends Task {
         if (!(timeMin == 0 && timeMax == 24000)) {
             titleBuilder.append("between the time ").append(timeMin).append(" and ").append(timeMax);
         }
-        return Text.of(titleBuilder.toString().trim());
+
+        return Component.literal(titleBuilder.toString().trim());
     }
 
     @Override
@@ -259,29 +259,32 @@ public class CobblemonTask extends Task {
         if (pokemons.isEmpty()) {
             return pokeBallIcon;
         }
-        return getPokemonIcon(new Identifier(pokemons.get(0)));
+        return getPokemonIcon(ResourceLocation.parse(pokemons.get(0)));
     }
 
-    public Icon getIconFromIdentifier(Identifier identifier) {
-        ItemStack itemStack = Registries.ITEM.get(identifier).getDefaultStack();
+
+    public Icon getIconFromIdentifier(ResourceLocation ResourceLocation) {
+        ItemStack itemStack = BuiltInRegistries.ITEM.get(ResourceLocation).getDefaultInstance();
         if (itemStack.isEmpty()) {
             return pokeBallIcon;
         } else {
             return ItemIcon.getItemIcon(itemStack);
         }
+
     }
 
-    public Icon getPokemonIcon(Identifier pokemon) {
-        Item pokemonModelItem = Registries.ITEM.get(new Identifier("cobblemon", "pokemon_model"));
-        NbtCompound nbt = new NbtCompound();
-        nbt.putString("species", pokemon.toString());
-        pokemonModelItem.getDefaultStack().setNbt(nbt);
-        ItemStack stack = new ItemStack(pokemonModelItem);
-        stack.setNbt(nbt);
-        return ItemIcon.getItemIcon(stack);
+    public Icon getPokemonIcon(ResourceLocation pokemon) {
+        return pokeBallIcon;
+//        Item pokemonModelItem = Registries.ITEM.get(new ResourceLocation("cobblemon", "pokemon_model"));
+//        NbtCompound nbt = new NbtCompound();
+//        nbt.putString("species", pokemon.toString());
+//        pokemonModelItem.getDefaultStack().setNbt(nbt);
+//        ItemStack stack = new ItemStack(pokemonModelItem);
+//        stack.setNbt(nbt);
+//        return ItemIcon.getItemIcon(stack);
     }
 
-    public void CobblemonTaskIncrease(TeamData teamData, Pokemon pokemon, String executedAction, long progress, ServerPlayerEntity player) {
+    public void CobblemonTaskIncrease(TeamData teamData, Pokemon pokemon, String executedAction, long progress, ServerPlayer player) {
         String[] obtainingMethods = {"catch", "evolve", "trade_for", "obtain", "revive_fossil"};
         if (CobblemonQuestsConfig.ignoredPokemon.contains(pokemon.getSpecies().toString().toLowerCase())) return;
         if (actions.contains(executedAction) || (actions.contains("obtain") && Arrays.asList(obtainingMethods).contains(executedAction))) {
@@ -293,7 +296,7 @@ public class CobblemonTask extends Task {
             }
             // Check the time of action
             if (!(timeMin == 0 && timeMax == 24000)) {
-                long timeOfDay = player.getEntityWorld().getTimeOfDay() % 24000;
+                long timeOfDay = player.level().getDayTime() % 24000;
                 long actualMin = timeMin;
                 long actualMax = timeMax;
                 // Adjusts the time to account for the 24000 cycle
@@ -314,13 +317,13 @@ public class CobblemonTask extends Task {
             }
             // Check dimension
             if (!dimensions.isEmpty()) {
-                if (!dimensions.contains(player.getEntityWorld().getRegistryKey().getValue().toString())) {
+                if (!dimensions.contains(player.level().dimension().location().toString())) {
                     return;
                 }
             }
             // Check biome
             if (!biomes.isEmpty()) {
-                if (!biomes.contains(player.getEntityWorld().getBiome(player.getBlockPos()).getKey().get().getValue().toString())) {
+                if (!biomes.contains(player.level().getBiome(player.blockPosition()).unwrapKey().get().location().toString())) {
                     return;
                 }
             }
