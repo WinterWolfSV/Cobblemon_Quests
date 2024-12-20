@@ -3,7 +3,7 @@ plugins {
     id("java-library")
     kotlin("jvm") version ("1.7.10")
 
-    id("dev.architectury.loom") version ("1.6.395") apply false
+    id("dev.architectury.loom") version ("1.7-SNAPSHOT") apply false
     id("architectury-plugin") version ("3.4-SNAPSHOT") apply false
 }
 
@@ -21,6 +21,6 @@ allprojects {
         maven("https://maven.impactdev.net/repository/development/")
         maven ("https://cursemaven.com")
         maven("https://thedarkcolour.github.io/KotlinForForge/")
+        maven(url = "https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/")
     }
 }
-
