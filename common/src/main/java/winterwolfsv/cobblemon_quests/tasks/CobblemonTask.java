@@ -192,9 +192,9 @@ public class CobblemonTask extends Task {
         Function<String, String> biomeAndDimensionNameProcessor = (name) -> "(" + name.replace("_", " ").replace(":", ") ");
         List<String> biomesList = new ArrayList<>(registryManager.registryOrThrow(BuiltInRegistries.BIOME_SOURCE.key()).entrySet().stream().map(entry -> entry.getKey().toString()).toList());
         addConfigList(config, "biomes", biomes, biomesList, null, biomeAndDimensionNameProcessor);
-//        List<String> dimensionsList = new ArrayList<>(registryManager.get(RegistryKeys.DIMENSION_TYPE).getEntrySet().stream().map(entry -> entry.getKey().getValue().toString()).toList());
-//        dimensionsList.remove("minecraft:overworld_caves");
-//        addConfigList(config, "dimensions", dimensions, dimensionsList, null, biomeAndDimensionNameProcessor);
+        // Sorry to anyone with custom dimensions :/ Feel free to PR if you find a way to get dimensions dynamically on the client
+        List<String> dimensionList = List.of("minecraft:overworld","minecraft:the_end","minecraft:the_nether");
+        addConfigList(config, "dimensions", dimensions, dimensionList, null, biomeAndDimensionNameProcessor);
         config.addLong("time_min", timeMin, v -> timeMin = v, 0L, 0L, 24000L).setNameKey(MOD_ID + ".task.time_min");
         config.addLong("time_max", timeMax, v -> timeMax = v, 24000L, 0L, 24000L).setNameKey(MOD_ID + ".task.time_max");
     }
