@@ -1,7 +1,9 @@
 package winterwolfsv.cobblemon_quests.tasks;
 
+import com.cobblemon.mod.common.CobblemonItemComponents;
 import com.cobblemon.mod.common.api.pokeball.PokeBalls;
 import com.cobblemon.mod.common.api.pokemon.PokemonSpecies;
+import com.cobblemon.mod.common.item.components.PokemonItemComponent;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import dev.ftb.mods.ftblibrary.config.*;
 import dev.ftb.mods.ftblibrary.icon.Icon;
@@ -21,7 +23,10 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import org.joml.Vector4f;
 import winterwolfsv.cobblemon_quests.config.CobblemonQuestsConfig;
 
 import java.util.*;
@@ -274,20 +279,23 @@ public class CobblemonTask extends Task {
     }
 
     public Icon getPokemonIcon(ResourceLocation pokemon) {
-        return pokeBallIcon;
-//        Item pokemonModelItem = Registries.ITEM.get(new ResourceLocation("cobblemon", "pokemon_model"));
-//        NbtCompound nbt = new NbtCompound();
-//        nbt.putString("species", pokemon.toString());
-//        pokemonModelItem.getDefaultStack().setNbt(nbt);
-//        ItemStack stack = new ItemStack(pokemonModelItem);
-//        stack.setNbt(nbt);
-//        return ItemIcon.getItemIcon(stack);
+        // TODO Figure out why the pokemon icon tint is so dark
+        Item pokemonModelItem = BuiltInRegistries.ITEM.get(ResourceLocation.fromNamespaceAndPath("cobblemon", "pokemon_model"));
+        CompoundTag nbt = new CompoundTag();
+        nbt.putString("species", pokemon.toString());
+        ItemStack stack = new ItemStack(pokemonModelItem);
+        PokemonItemComponent c = new PokemonItemComponent(pokemon, new HashSet<>(), new Vector4f(1,1,1,1));
+        stack.set(CobblemonItemComponents.INSTANCE.getPOKEMON_ITEM(), c);
+        return ItemIcon.getItemIcon(stack);
+        // Command to give player pokemon model:
+        // give @s cobblemon:pokemon_model[cobblemon:pokemon_item={species:"cobblemon:<pokemon_name>",aspects:[]}]
     }
 
     public void CobblemonTaskIncrease(TeamData teamData, Pokemon pokemon, String executedAction, long progress, ServerPlayer player) {
         String[] obtainingMethods = {"catch", "evolve", "trade_for", "obtain", "revive_fossil"};
         if (CobblemonQuestsConfig.ignoredPokemon.contains(pokemon.getSpecies().toString().toLowerCase())) return;
         if (actions.contains(executedAction) || (actions.contains("obtain") && Arrays.asList(obtainingMethods).contains(executedAction))) {
+            Level world = player.level();
             // Check region
             if (!regions.isEmpty()) {
                 if (!regions.contains(pokemon.getSpecies().getLabels().toArray()[0].toString())) {
@@ -296,7 +304,7 @@ public class CobblemonTask extends Task {
             }
             // Check the time of action
             if (!(timeMin == 0 && timeMax == 24000)) {
-                long timeOfDay = player.level().getDayTime() % 24000;
+                long timeOfDay = world.getDayTime() % 24000;
                 long actualMin = timeMin;
                 long actualMax = timeMax;
                 // Adjusts the time to account for the 24000 cycle
@@ -317,13 +325,13 @@ public class CobblemonTask extends Task {
             }
             // Check dimension
             if (!dimensions.isEmpty()) {
-                if (!dimensions.contains(player.level().dimension().location().toString())) {
+                if (!dimensions.contains(world.dimension().location().toString())) {
                     return;
                 }
             }
             // Check biome
             if (!biomes.isEmpty()) {
-                if (!biomes.contains(player.level().getBiome(player.blockPosition()).unwrapKey().get().location().toString())) {
+                if (!biomes.contains(world.getBiome(player.blockPosition()).unwrapKey().get().location().toString())) {
                     return;
                 }
             }
