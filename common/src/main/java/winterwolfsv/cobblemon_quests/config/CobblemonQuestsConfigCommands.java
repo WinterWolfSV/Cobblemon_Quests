@@ -1,7 +1,6 @@
 package winterwolfsv.cobblemon_quests.config;
 
 import com.cobblemon.mod.common.api.pokemon.PokemonSpecies;
-import com.cobblemon.mod.common.pokemon.Species;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -14,9 +13,6 @@ import java.util.Objects;
 
 public class CobblemonQuestsConfigCommands {
 
-
-    // /cobblemonquestsconfig blacklisted_pokemon <add/remove> <pokemon>
-    // /cobblemonquestsconfig suppress_warnings <true/false>
     public static void registerCommands(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal("cobblemonquestsconfig")
                 .requires(source -> source.hasPermission(2))
@@ -41,21 +37,23 @@ public class CobblemonQuestsConfigCommands {
                         .then(Commands.argument("action", StringArgumentType.string())
                                 .suggests((context, builder) -> {
                                     List<String> suggestions = List.of("add", "remove");
-                                    for (String suggestion : suggestions) {
-                                        builder.suggest(suggestion);
-                                    }
+                                    String input = builder.getRemainingLowerCase();
+                                    suggestions.stream()
+                                            .filter(suggestion -> suggestion.startsWith(input))
+                                            .forEach(builder::suggest);
                                     return builder.buildFuture();
                                 })
                                 .then(Commands.argument("pokemon", StringArgumentType.string())
                                         .suggests((context, builder) -> {
+                                            String input = builder.getRemainingLowerCase();
                                             if (StringArgumentType.getString(context, "action").equals("add")) {
-                                                for (Species species : PokemonSpecies.INSTANCE.getSpecies()) {
-                                                    builder.suggest(species.getName());
-                                                }
+                                                PokemonSpecies.INSTANCE.getSpecies().stream()
+                                                        .filter(p -> p.getName().toLowerCase().startsWith(input))
+                                                        .forEach(p -> builder.suggest(p.getName()));
                                             } else if (StringArgumentType.getString(context, "action").equals("remove")) {
-                                                for (String pokemon : CobblemonQuestsConfig.ignoredPokemon) {
-                                                    builder.suggest(pokemon);
-                                                }
+                                                CobblemonQuestsConfig.ignoredPokemon.stream()
+                                                        .filter(p -> p.toLowerCase().startsWith(input))
+                                                        .forEach(builder::suggest);
                                             }
                                             return builder.buildFuture();
                                         })
@@ -87,7 +85,6 @@ public class CobblemonQuestsConfigCommands {
                             return 1;
                         })
                 )
-
         );
     }
 }
