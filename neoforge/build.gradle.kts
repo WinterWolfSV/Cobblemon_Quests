@@ -6,7 +6,9 @@ plugins {
 
 architectury {
     platformSetupLoomIde()
-    neoForge()
+    neoForge {
+        platformPackage = "forge"
+    }
 }
 
 configurations {
@@ -17,20 +19,8 @@ configurations {
 }
 
 loom {
-    // TODO Make mixins work again
-
-    //    @Suppress("UnstableApiUsage")
-    //    mixin {
-    //        defaultRefmapName.set("cobblemon_quests-${project.name}.refmap.json")
-    //    }
-    //    forge {
-    //        mixinConfig("cobblemon_quests-common.mixins.json")
-    //    }
-
     enableTransitiveAccessWideners.set(true)
     silentMojangMappingsLicense()
-
-
 }
 
 repositories {
@@ -60,7 +50,7 @@ dependencies {
     "developmentNeoForge"(project(":common", configuration = "namedElements")) {
         isTransitive = false
     }
-    shadowBundle(project(":common", configuration = "transformProductionNeoforge"))
+    shadowBundle(project(":common", configuration = "transformProductionNeoForge"))
 
     modApi("dev.architectury:architectury-neoforge:${property("architectury_version")}")
 
