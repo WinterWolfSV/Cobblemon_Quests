@@ -1,20 +1,22 @@
-package winterwolfsv.cobblemon_quests.config;
+package winterwolfsv.cobblemon_quests.commands;
 
 import com.cobblemon.mod.common.api.pokemon.PokemonSpecies;
+import com.cobblemon.mod.common.pokemon.Species;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
+import winterwolfsv.cobblemon_quests.commands.suggestions.ListSuggestionProvider;
+import winterwolfsv.cobblemon_quests.config.CobblemonQuestsConfig;
 
 import java.util.List;
 import java.util.Objects;
 
-public class CobblemonQuestsConfigCommands {
-
-    public static void registerCommands(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("cobblemonquestsconfig")
+public class ConfigCommand {
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+        dispatcher.register(Commands.literal("cobblemonquests")
                 .requires(source -> source.hasPermission(2))
                 .then(Commands.literal("suppress_warnings")
                         .then(Commands.argument("suppress_warnings", BoolArgumentType.bool())
@@ -35,25 +37,13 @@ public class CobblemonQuestsConfigCommands {
                 )
                 .then(Commands.literal("blacklisted_pokemon")
                         .then(Commands.argument("action", StringArgumentType.string())
-                                .suggests((context, builder) -> {
-                                    List<String> suggestions = List.of("add", "remove");
-                                    String input = builder.getRemainingLowerCase();
-                                    suggestions.stream()
-                                            .filter(suggestion -> suggestion.startsWith(input))
-                                            .forEach(builder::suggest);
-                                    return builder.buildFuture();
-                                })
+                                .suggests(new ListSuggestionProvider(List.of("add", "remove")))
                                 .then(Commands.argument("pokemon", StringArgumentType.string())
                                         .suggests((context, builder) -> {
-                                            String input = builder.getRemainingLowerCase();
                                             if (StringArgumentType.getString(context, "action").equals("add")) {
-                                                PokemonSpecies.INSTANCE.getSpecies().stream()
-                                                        .filter(p -> p.getName().toLowerCase().startsWith(input))
-                                                        .forEach(p -> builder.suggest(p.getName()));
+                                                return new ListSuggestionProvider(PokemonSpecies.INSTANCE.getSpecies().stream().map(Species::getName).toList()).getSuggestions(context, builder);
                                             } else if (StringArgumentType.getString(context, "action").equals("remove")) {
-                                                CobblemonQuestsConfig.ignoredPokemon.stream()
-                                                        .filter(p -> p.toLowerCase().startsWith(input))
-                                                        .forEach(builder::suggest);
+                                                return new ListSuggestionProvider(CobblemonQuestsConfig.ignoredPokemon).getSuggestions(context, builder);
                                             }
                                             return builder.buildFuture();
                                         })
