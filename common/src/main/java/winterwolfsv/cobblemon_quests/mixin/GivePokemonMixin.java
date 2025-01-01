@@ -5,9 +5,9 @@ import com.cobblemon.mod.common.command.GivePokemon;
 import com.cobblemon.mod.common.command.argument.PokemonPropertiesArgumentType;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import com.mojang.brigadier.context.CommandContext;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -29,7 +29,7 @@ public abstract class GivePokemonMixin {
 //    }
 
     @Inject(method = "execute", at = @At("HEAD"))
-    private void execute(CommandContext<ServerCommandSource> context, ServerPlayerEntity player, CallbackInfoReturnable<Integer> cir) {
+    private void execute(CommandContext<CommandSourceStack> context, ServerPlayer player, CallbackInfoReturnable<Integer> cir) {
         String input = context.getInput().toLowerCase(Locale.ROOT);
         Pattern pattern = Pattern.compile("(?<=countascatch=)\\w*");
         Matcher matcher = pattern.matcher(input);
@@ -48,7 +48,7 @@ public abstract class GivePokemonMixin {
             } else if (value.equals("false")) {
                 CobblemonQuests.eventHandler.pokemonObtain(pokemon, player);
             } else {
-                player.sendMessage(Text.of("Command literal \"countascatch\" must be either true or false."), false);
+                player.sendSystemMessage(Component.literal("Command literal \"countascatch\" must be either true or false."), false);
             }
         } else {
             CobblemonQuests.eventHandler.pokemonObtain(pokemon, player);

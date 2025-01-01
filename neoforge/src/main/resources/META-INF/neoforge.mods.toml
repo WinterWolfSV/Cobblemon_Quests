@@ -1,0 +1,12 @@
+modLoader = "javafml"
+loaderVersion = "[1,)"
+license = "${license}"
+#issueTrackerURL = "${repository}/issues"
+
+[[mods]]
+modId = "cobblemon_quests"
+version = "${version}"
+displayName = "${mod_name}"
+updateJSONURL="https://raw.githubusercontent.com/WinterWolfSV/Cobblemon_Quests/master/forge/src/main/resources/META-INF/forge_mod_versions.json"
+displayURL="https://modrinth.com/mod/cobblemon-quests/versions"
+logoFile = "icon.png"

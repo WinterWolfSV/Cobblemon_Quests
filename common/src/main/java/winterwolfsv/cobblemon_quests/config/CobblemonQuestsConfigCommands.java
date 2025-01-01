@@ -1,93 +1,90 @@
 package winterwolfsv.cobblemon_quests.config;
 
 import com.cobblemon.mod.common.api.pokemon.PokemonSpecies;
-import com.cobblemon.mod.common.pokemon.Species;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
-import net.minecraft.command.CommandSource;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.Component;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
-
 public class CobblemonQuestsConfigCommands {
 
-
-    // /cobblemonquestsconfig blacklisted_pokemon <add/remove> <pokemon>
-    // /cobblemonquestsconfig suppress_warnings <true/false>
-    public static void registerCommands(CommandDispatcher<ServerCommandSource> dispatcher) {
-        dispatcher.register(literal("cobblemonquestsconfig")
-                .requires(source -> source.hasPermissionLevel(2))
-                .then(literal("suppress_warnings")
-                        .then(argument("suppress_warnings", BoolArgumentType.bool())
+    public static void registerCommands(CommandDispatcher<CommandSourceStack> dispatcher) {
+        dispatcher.register(Commands.literal("cobblemonquestsconfig")
+                .requires(source -> source.hasPermission(2))
+                .then(Commands.literal("suppress_warnings")
+                        .then(Commands.argument("suppress_warnings", BoolArgumentType.bool())
                                 .executes(context -> {
                                     if (Objects.equals(CobblemonQuestsConfig.suppressWarnings, BoolArgumentType.getBool(context, "suppress_warnings"))) {
-                                        context.getSource().sendFeedback(() -> Text.of("Suppress Warnings is already set to: " + CobblemonQuestsConfig.suppressWarnings), true);
+                                        context.getSource().sendSystemMessage(Component.literal("Suppress Warnings is already set to: " + CobblemonQuestsConfig.suppressWarnings));
                                         return 0;
                                     }
                                     CobblemonQuestsConfig.suppressWarnings = BoolArgumentType.getBool(context, "suppress_warnings");
                                     CobblemonQuestsConfig.save();
-                                    context.getSource().sendFeedback(() -> Text.of("Suppress Warnings set to: " + CobblemonQuestsConfig.suppressWarnings), true);
+                                    context.getSource().sendSystemMessage(Component.literal("Suppress Warnings set to: " + CobblemonQuestsConfig.suppressWarnings));
                                     return 1;
                                 }))
                         .executes(context -> {
-                            context.getSource().sendFeedback(() -> Text.of("Suppress Warnings is currently set to: " + CobblemonQuestsConfig.suppressWarnings), false);
+                            context.getSource().sendSystemMessage(Component.literal("Suppress Warnings is currently set to: " + CobblemonQuestsConfig.suppressWarnings));
                             return 1;
                         })
                 )
-                .then(literal("blacklisted_pokemon")
-                        .then(argument("action", StringArgumentType.string())
+                .then(Commands.literal("blacklisted_pokemon")
+                        .then(Commands.argument("action", StringArgumentType.string())
                                 .suggests((context, builder) -> {
                                     List<String> suggestions = List.of("add", "remove");
-                                    return CommandSource.suggestMatching(suggestions, builder);
+                                    String input = builder.getRemainingLowerCase();
+                                    suggestions.stream()
+                                            .filter(suggestion -> suggestion.startsWith(input))
+                                            .forEach(builder::suggest);
+                                    return builder.buildFuture();
                                 })
-                                .then(argument("pokemon", StringArgumentType.string())
+                                .then(Commands.argument("pokemon", StringArgumentType.string())
                                         .suggests((context, builder) -> {
-                                            List<String> suggestions = new ArrayList<>();
+                                            String input = builder.getRemainingLowerCase();
                                             if (StringArgumentType.getString(context, "action").equals("add")) {
-                                                for (Species species : PokemonSpecies.INSTANCE.getSpecies()) {
-                                                    suggestions.add(species.getName());
-                                                }
+                                                PokemonSpecies.INSTANCE.getSpecies().stream()
+                                                        .filter(p -> p.getName().toLowerCase().startsWith(input))
+                                                        .forEach(p -> builder.suggest(p.getName()));
                                             } else if (StringArgumentType.getString(context, "action").equals("remove")) {
-                                                suggestions.addAll(CobblemonQuestsConfig.ignoredPokemon);
+                                                CobblemonQuestsConfig.ignoredPokemon.stream()
+                                                        .filter(p -> p.toLowerCase().startsWith(input))
+                                                        .forEach(builder::suggest);
                                             }
-                                            return CommandSource.suggestMatching(suggestions, builder);
+                                            return builder.buildFuture();
                                         })
                                         .executes(context -> {
                                                     String action = StringArgumentType.getString(context, "action");
                                                     String pokemon = StringArgumentType.getString(context, "pokemon").toLowerCase();
                                                     if (action.equals("add")) {
                                                         if (CobblemonQuestsConfig.ignoredPokemon.contains(pokemon)) {
-                                                            context.getSource().sendFeedback(() -> Text.of("Pokémon " + pokemon + " is already blacklisted."), true);
+                                                            context.getSource().sendSystemMessage(Component.literal("Pokémon " + pokemon + " is already blacklisted."));
                                                             return 0;
                                                         }
                                                         CobblemonQuestsConfig.ignoredPokemon.add(pokemon);
                                                         CobblemonQuestsConfig.save();
-                                                        context.getSource().sendFeedback(() -> Text.of("Pokémon " + pokemon + " has been blacklisted."), true);
+                                                        context.getSource().sendSystemMessage(Component.literal("Pokémon " + pokemon + " has been blacklisted."));
                                                     } else if (action.equals("remove")) {
                                                         if (!CobblemonQuestsConfig.ignoredPokemon.contains(pokemon)) {
-                                                            context.getSource().sendFeedback(() -> Text.of("Pokémon " + pokemon + " is not blacklisted."), true);
+                                                            context.getSource().sendSystemMessage(Component.literal("Pokémon " + pokemon + " is not blacklisted."));
                                                             return 0;
                                                         }
                                                         CobblemonQuestsConfig.ignoredPokemon.remove(pokemon);
                                                         CobblemonQuestsConfig.save();
-                                                        context.getSource().sendFeedback(() -> Text.of("Pokémon " + pokemon + " has been removed from the blacklist."), true);
+                                                        context.getSource().sendSystemMessage(Component.literal("Pokémon " + pokemon + " has been removed from the blacklist."));
                                                     }
                                                     return 1;
                                                 }
                                         )))
                         .executes(context -> {
-                            context.getSource().sendFeedback(() -> Text.of("Currently blacklisted Pokémon: " + CobblemonQuestsConfig.ignoredPokemon), false);
+                            context.getSource().sendSystemMessage(Component.literal("Currently blacklisted Pokémon: " + CobblemonQuestsConfig.ignoredPokemon));
                             return 1;
                         })
                 )
-
         );
     }
 }

@@ -17,8 +17,8 @@
     "fabricloader": "*",
     "fabric": "*",
     "minecraft": "${supported_minecraft_versions}",
-    "cobblemon": ">=1.4.0",
-    "architectury": ">=9.0.0",
-    "ftbquests": ">=2001.0.0"
+    "cobblemon": ">=1.6.0",
+    "architectury": ">=13.0.0",
+    "ftbquests": ">=2101.0.0"
   }
 }
