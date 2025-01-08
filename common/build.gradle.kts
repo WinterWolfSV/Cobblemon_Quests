@@ -8,17 +8,10 @@ architectury {
     platformSetupLoomIde()
 }
 
-@Suppress("UnstableApiUsage")
-loom.mixin {
-    defaultRefmapName.set("cobblemon_quests-${project.name}.refmap.json")
-}
-
 dependencies {
     minecraft("com.mojang:minecraft:${property("minecraft_version")}")
     mappings(loom.officialMojangMappings())
     modImplementation("com.cobblemon:mod:${property("cobblemon_version")}") { isTransitive = false }
-
-
 
     // alL fabric dependencies:
     modCompileOnly("net.fabricmc:fabric-loader:${property("fabric_loader_version")}")
