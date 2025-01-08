@@ -4,6 +4,7 @@ import com.cobblemon.mod.common.api.Priority;
 import com.cobblemon.mod.common.api.battles.model.actor.BattleActor;
 import com.cobblemon.mod.common.api.events.CobblemonEvents;
 import com.cobblemon.mod.common.api.events.battles.BattleVictoryEvent;
+import com.cobblemon.mod.common.api.events.pokemon.FossilRevivedEvent;
 import com.cobblemon.mod.common.api.events.pokemon.LevelUpEvent;
 import com.cobblemon.mod.common.api.events.pokemon.PokemonCapturedEvent;
 import com.cobblemon.mod.common.api.events.pokemon.TradeCompletedEvent;
@@ -33,11 +34,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-public class FTBCobblemonEventHandler {
+public class CobblemonQuestsEventHandler {
     private List<CobblemonTask> pokemonTasks = null;
     private UUID lastPokemonUuid = null;
 
-    public FTBCobblemonEventHandler init() {
+    public CobblemonQuestsEventHandler init() {
         EntityEvent.LIVING_DEATH.register(this::entityKill);
         ClearFileCacheEvent.EVENT.register(this::fileCacheClear);
         CobblemonEvents.POKEMON_CAPTURED.subscribe(Priority.LOWEST, this::pokemonCatch);
@@ -48,7 +49,19 @@ public class FTBCobblemonEventHandler {
         CobblemonEvents.EVOLUTION_ACCEPTED.subscribe(Priority.LOWEST, this::pokemonEvolutionAccepted);
         CobblemonEvents.TRADE_COMPLETED.subscribe(Priority.LOWEST, this::pokemonTrade);
         CobblemonEvents.POKEMON_RELEASED_EVENT_PRE.subscribe(Priority.LOWEST, this::pokemonRelease);
+        CobblemonEvents.FOSSIL_REVIVED.subscribe(Priority.LOWEST, this::fossilRevived);
         return this;
+    }
+
+    private Unit fossilRevived(FossilRevivedEvent fossilRevivedEvent) {
+        try {
+            ServerPlayer player = fossilRevivedEvent.getPlayer();
+            Pokemon pokemon = fossilRevivedEvent.getPokemon();
+            processTasksForTeam(pokemon, "revive_fossil", 1, player);
+        } catch (Exception e) {
+            CobblemonQuests.LOGGER.warning("Error processing fossil revive event " + Arrays.toString(e.getStackTrace()));
+        }
+        return Unit.INSTANCE;
     }
 
     private void fileCacheClear(QuestFile file) {
@@ -93,16 +106,16 @@ public class FTBCobblemonEventHandler {
             List<ServerPlayer> players = battleVictoryEvent.getBattle().getPlayers();
             // Ensures that the battle is only player vs npc and not player vs player
             if (players.size() != 1) return Unit.INSTANCE;
-            ServerPlayer player = players.get(0);
-            if (!player.getName().equals(battleVictoryEvent.getWinners().get(0).getName())) return Unit.INSTANCE;
+            ServerPlayer player = players.getFirst();
+            if (!player.getName().equals(battleVictoryEvent.getWinners().getFirst().getName())) return Unit.INSTANCE;
             Iterable<BattleActor> battleActors = battleVictoryEvent.getBattle().getActors();
             for (BattleActor actor : battleActors) {
                 // Checks if the pokemon is the last pokemon that was caught. Done to bypass an issue with two events being
                 // fired for the same pokemon and adding progress to catch and defeat tasks.
-                if (actor.getPokemonList().get(0).getEffectedPokemon().getUuid() == lastPokemonUuid)
+                if (actor.getPokemonList().getFirst().getEffectedPokemon().getUuid() == lastPokemonUuid)
                     return Unit.INSTANCE;
-                if (actor != battleVictoryEvent.getWinners().get(0)) {
-                    processTasksForTeam(actor.getPokemonList().get(0).getEffectedPokemon(), "defeat", 1, player);
+                if (actor != battleVictoryEvent.getWinners().getFirst()) {
+                    processTasksForTeam(actor.getPokemonList().getFirst().getEffectedPokemon(), "defeat", 1, player);
                 }
             }
         } catch (Exception e) {
@@ -191,14 +204,6 @@ public class FTBCobblemonEventHandler {
             CobblemonQuests.LOGGER.warning("Error processing level up event " + Arrays.toString(e.getStackTrace()));
         }
         return Unit.INSTANCE;
-    }
-
-    public void fossilRevivedHandler(ServerPlayer player, Pokemon pokemon) {
-        try {
-            processTasksForTeam(pokemon, "revive_fossil", 1, player);
-        } catch (Exception e) {
-            CobblemonQuests.LOGGER.warning("Error processing fossil revive event " + Arrays.toString(e.getStackTrace()));
-        }
     }
 
     public void processTasksForTeam(Pokemon pokemon, String action, long amount, ServerPlayer player) {
