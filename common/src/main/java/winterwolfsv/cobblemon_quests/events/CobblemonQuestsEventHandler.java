@@ -4,10 +4,9 @@ import com.cobblemon.mod.common.api.Priority;
 import com.cobblemon.mod.common.api.battles.model.actor.BattleActor;
 import com.cobblemon.mod.common.api.events.CobblemonEvents;
 import com.cobblemon.mod.common.api.events.battles.BattleVictoryEvent;
-import com.cobblemon.mod.common.api.events.pokemon.FossilRevivedEvent;
-import com.cobblemon.mod.common.api.events.pokemon.LevelUpEvent;
-import com.cobblemon.mod.common.api.events.pokemon.PokemonCapturedEvent;
-import com.cobblemon.mod.common.api.events.pokemon.TradeCompletedEvent;
+import com.cobblemon.mod.common.api.events.fishing.BobberSpawnPokemonEvent;
+import com.cobblemon.mod.common.api.events.pokedex.scanning.PokemonScannedEvent;
+import com.cobblemon.mod.common.api.events.pokemon.*;
 import com.cobblemon.mod.common.api.events.pokemon.evolution.EvolutionAcceptedEvent;
 import com.cobblemon.mod.common.api.events.pokemon.evolution.EvolutionCompleteEvent;
 import com.cobblemon.mod.common.api.events.starter.StarterChosenEvent;
@@ -30,13 +29,12 @@ import net.minecraft.world.entity.Entity;
 import winterwolfsv.cobblemon_quests.CobblemonQuests;
 import winterwolfsv.cobblemon_quests.tasks.CobblemonTask;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class CobblemonQuestsEventHandler {
     private List<CobblemonTask> pokemonTasks = null;
     private UUID lastPokemonUuid = null;
+    private Set<String> lastAction = new HashSet<>();
 
     public CobblemonQuestsEventHandler init() {
         EntityEvent.LIVING_DEATH.register(this::entityKill);
@@ -50,7 +48,35 @@ public class CobblemonQuestsEventHandler {
         CobblemonEvents.TRADE_COMPLETED.subscribe(Priority.LOWEST, this::pokemonTrade);
         CobblemonEvents.POKEMON_RELEASED_EVENT_PRE.subscribe(Priority.LOWEST, this::pokemonRelease);
         CobblemonEvents.FOSSIL_REVIVED.subscribe(Priority.LOWEST, this::fossilRevived);
+        CobblemonEvents.BOBBER_SPAWN_POKEMON_POST.subscribe(Priority.LOWEST, this::pokemonBobberSpawn);
+        CobblemonEvents.POKEMON_SCANNED.subscribe(Priority.LOWEST, this::pokemonScan);
         return this;
+    }
+
+    private Unit pokemonScan(PokemonScannedEvent pokemonScannedEvent) {
+        try {
+            if (!(pokemonScannedEvent.getScannedEntity().resolveEntityScan() instanceof PokemonEntity)) {
+                return Unit.INSTANCE;
+            }
+            Pokemon pokemon = ((PokemonEntity) pokemonScannedEvent.getScannedEntity()).getPokemon();
+            ServerPlayer player = pokemonScannedEvent.getPlayer();
+            System.out.println("Pokemon scanned: " + pokemon.getSpecies().getName());
+            processTasksForTeam(pokemon, "scan", 1, player);
+        } catch (Exception e) {
+            CobblemonQuests.LOGGER.warning("Error processing scan event " + Arrays.toString(e.getStackTrace()));
+        }
+        return Unit.INSTANCE;
+    }
+
+    private Unit pokemonBobberSpawn(BobberSpawnPokemonEvent.Post post) {
+        try {
+            Pokemon pokemon = post.getPokemon().getPokemon();
+            ServerPlayer player = (ServerPlayer) post.component1().getPlayerOwner();
+            processTasksForTeam(pokemon, "reel", 1, player);
+        } catch (Exception e) {
+            CobblemonQuests.LOGGER.warning("Error processing bobber spawn event " + Arrays.toString(e.getStackTrace()));
+        }
+        return Unit.INSTANCE;
     }
 
     private Unit fossilRevived(FossilRevivedEvent fossilRevivedEvent) {
@@ -151,14 +177,6 @@ public class CobblemonQuestsEventHandler {
         return Unit.INSTANCE;
     }
 
-    public void pokemonObtain(Pokemon pokemon, ServerPlayer player) {
-        try {
-            processTasksForTeam(pokemon, "obtain", 1, player);
-        } catch (Exception e) {
-            CobblemonQuests.LOGGER.warning("Error processing obtain event " + Arrays.toString(e.getStackTrace()));
-        }
-    }
-
     private Unit pokemonStarterChosen(StarterChosenEvent starterChosenEvent) {
         try {
             ServerPlayer player = starterChosenEvent.getPlayer();
@@ -207,6 +225,9 @@ public class CobblemonQuestsEventHandler {
     }
 
     public void processTasksForTeam(Pokemon pokemon, String action, long amount, ServerPlayer player) {
+        Set<String> currentAction = new HashSet<>(List.of(pokemon.getUuid().toString(), player.getStringUUID(), action));
+        if (currentAction.equals(lastAction)) return;
+        lastAction = currentAction;
         try {
             if (this.pokemonTasks == null) {
                 this.pokemonTasks = ServerQuestFile.INSTANCE.collect(CobblemonTask.class);
