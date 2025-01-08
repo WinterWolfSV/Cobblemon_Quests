@@ -18,6 +18,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -189,10 +190,10 @@ public class CobblemonTask extends Task {
         List<String> regionList = Arrays.asList("gen1", "gen2", "gen3", "gen4", "gen5", "gen6", "gen7", "gen8", "gen9");
         addConfigList(config, "regions", regions, regionList, null, null);
         Function<String, String> biomeAndDimensionNameProcessor = (name) -> "(" + name.replace("_", " ").replace(":", ") ");
-        List<String> biomesList = new ArrayList<>(registryManager.registryOrThrow(BuiltInRegistries.BIOME_SOURCE.key()).entrySet().stream().map(entry -> entry.getKey().toString()).toList());
-        addConfigList(config, "biomes", biomes, biomesList, null, biomeAndDimensionNameProcessor);
-        // Sorry to anyone with custom dimensions :/ Feel free to PR if you find a way to get dimensions dynamically on the client
-        List<String> dimensionList = List.of("minecraft:overworld", "minecraft:the_end", "minecraft:the_nether");
+        List<String> biomeList = registryManager.registryOrThrow(Registries.BIOME).entrySet().stream().map(entry -> entry.getKey().location().toString()).toList();
+        addConfigList(config, "biomes", biomes, biomeList, null, biomeAndDimensionNameProcessor);
+        ArrayList<String> dimensionList = new ArrayList<>(registryManager.registryOrThrow(Registries.DIMENSION_TYPE).entrySet().stream().map(entry -> entry.getKey().location().toString()).toList());
+        dimensionList.remove("minecraft:overworld_caves");
         addConfigList(config, "dimensions", dimensions, dimensionList, null, biomeAndDimensionNameProcessor);
         config.addLong("time_min", timeMin, v -> timeMin = v, 0L, 0L, 24000L).setNameKey(MOD_ID + ".task.time_min");
         config.addLong("time_max", timeMax, v -> timeMax = v, 24000L, 0L, 24000L).setNameKey(MOD_ID + ".task.time_max");
