@@ -1,6 +1,10 @@
 package winterwolfsv.cobblemon_quests;
 
 import dev.architectury.platform.Platform;
+import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
+import net.minecraft.commands.synchronization.SingletonArgumentInfo;
+import net.minecraft.resources.ResourceLocation;
+import winterwolfsv.cobblemon_quests.commands.arguments.types.ActionListArgumentType;
 import winterwolfsv.cobblemon_quests.config.CobblemonQuestsConfig;
 import winterwolfsv.cobblemon_quests.events.Cobblemon1_5EventHandler;
 import winterwolfsv.cobblemon_quests.events.FTBCobblemonEventHandler;
@@ -22,6 +26,11 @@ public class CobblemonQuests {
         }
         eventHandler = new FTBCobblemonEventHandler().init();
         PokemonTaskTypes.init();
+
+        ArgumentTypeRegistry.registerArgumentType(
+                ResourceLocation.fromNamespaceAndPath(MOD_ID, "argument_list"),
+                ActionListArgumentType.class,
+                SingletonArgumentInfo.contextFree(ActionListArgumentType::actionList));
 
         //TODO Implement a better way to ensure that the minimum version of cobblemon for this feature is 1.5.1
         String cobblemonVersion = Platform.getMod("cobblemon").getVersion();

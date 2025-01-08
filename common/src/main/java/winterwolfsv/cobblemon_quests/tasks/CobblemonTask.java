@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 import static winterwolfsv.cobblemon_quests.CobblemonQuests.MOD_ID;
 
 public class CobblemonTask extends Task {
+    public static final List<String> actionList = Arrays.asList("catch", "defeat", "evolve", "kill", "level_up", "level_up_to", "release", "trade_away", "trade_for", "obtain", "select_starter", "revive_fossil");
     public Icon pokeBallIcon = ItemIcon.getItemIcon(PokeBalls.INSTANCE.getPOKE_BALL().item());
     public long amount = 1L;
     public boolean shiny = false;
@@ -167,12 +168,10 @@ public class CobblemonTask extends Task {
         // Asserts that the client is in a world, something that always should be true when the config is opened.
         assert Minecraft.getInstance().level != null;
         RegistryAccess registryManager = Minecraft.getInstance().level.registryAccess();
-        List<String> actionList = Arrays.asList("catch", "defeat", "evolve", "kill", "level_up", "level_up_to", "release", "trade_away", "trade_for", "obtain", "select_starter", "revive_fossil");
         addConfigList(config, "actions", actions, actionList, null, null);
         Function<String, String> pokemonNameProcessor = (name) -> name.split(":")[0] + ".species." + name.split(":")[1] + ".name";
         List<String> pokemonList = new ArrayList<>(PokemonSpecies.INSTANCE.getSpecies().stream().map(species -> species.resourceIdentifier.toString()).toList());
         Collections.sort(pokemonList);
-
         addConfigList(config, "pokemons", pokemons, pokemonList, this::getPokemonIcon, pokemonNameProcessor);
         config.addLong("amount", amount, v -> amount = v, 1L, 1L, Long.MAX_VALUE).setNameKey(MOD_ID + ".task.amount");
         config.addBool("shiny", shiny, v -> shiny = v, false).setNameKey(MOD_ID + ".task.shiny");
@@ -193,7 +192,7 @@ public class CobblemonTask extends Task {
         List<String> biomesList = new ArrayList<>(registryManager.registryOrThrow(BuiltInRegistries.BIOME_SOURCE.key()).entrySet().stream().map(entry -> entry.getKey().toString()).toList());
         addConfigList(config, "biomes", biomes, biomesList, null, biomeAndDimensionNameProcessor);
         // Sorry to anyone with custom dimensions :/ Feel free to PR if you find a way to get dimensions dynamically on the client
-        List<String> dimensionList = List.of("minecraft:overworld","minecraft:the_end","minecraft:the_nether");
+        List<String> dimensionList = List.of("minecraft:overworld", "minecraft:the_end", "minecraft:the_nether");
         addConfigList(config, "dimensions", dimensions, dimensionList, null, biomeAndDimensionNameProcessor);
         config.addLong("time_min", timeMin, v -> timeMin = v, 0L, 0L, 24000L).setNameKey(MOD_ID + ".task.time_min");
         config.addLong("time_max", timeMax, v -> timeMax = v, 24000L, 0L, 24000L).setNameKey(MOD_ID + ".task.time_max");
@@ -284,7 +283,7 @@ public class CobblemonTask extends Task {
         CompoundTag nbt = new CompoundTag();
         nbt.putString("species", pokemon.toString());
         ItemStack stack = new ItemStack(pokemonModelItem);
-        PokemonItemComponent c = new PokemonItemComponent(pokemon, new HashSet<>(), new Vector4f(1,1,1,1));
+        PokemonItemComponent c = new PokemonItemComponent(pokemon, new HashSet<>(), new Vector4f(1, 1, 1, 1));
         stack.set(CobblemonItemComponents.INSTANCE.getPOKEMON_ITEM(), c);
         return ItemIcon.getItemIcon(stack);
         // Command to give player pokemon model:

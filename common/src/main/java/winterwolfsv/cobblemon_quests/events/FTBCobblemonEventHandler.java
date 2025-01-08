@@ -201,7 +201,7 @@ public class FTBCobblemonEventHandler {
         }
     }
 
-    private void processTasksForTeam(Pokemon pokemon, String action, long amount, ServerPlayer player) {
+    public void processTasksForTeam(Pokemon pokemon, String action, long amount, ServerPlayer player) {
         try {
             if (this.pokemonTasks == null) {
                 this.pokemonTasks = ServerQuestFile.INSTANCE.collect(CobblemonTask.class);

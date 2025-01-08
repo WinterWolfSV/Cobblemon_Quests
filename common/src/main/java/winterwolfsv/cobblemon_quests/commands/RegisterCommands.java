@@ -11,6 +11,7 @@ public class RegisterCommands {
                         .requires(source -> source.hasPermission(2))
                         .then(SuppressWarningsCommand.register())
                         .then(BlacklistPokemonCommand.register())
+                        .then(GivePokemonCommand.register())
         );
     }
 }
