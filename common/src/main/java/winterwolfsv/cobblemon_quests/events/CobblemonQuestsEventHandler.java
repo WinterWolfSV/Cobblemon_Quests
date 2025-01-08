@@ -225,6 +225,7 @@ public class CobblemonQuestsEventHandler {
     }
 
     public void processTasksForTeam(Pokemon pokemon, String action, long amount, ServerPlayer player) {
+        if(player == null) return;
         Set<String> currentAction = new HashSet<>(List.of(pokemon.getUuid().toString(), player.getStringUUID(), action));
         if (currentAction.equals(lastAction)) return;
         lastAction = currentAction;
