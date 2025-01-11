@@ -296,7 +296,7 @@ public class CobblemonTask extends Task {
     }
 
     public void increase(TeamData teamData, Pokemon pokemon, String executedAction, long progress, ServerPlayer player) {
-        List<String> obtainingMethods = List.of("catch", "evolve", "trade_for", "obtain", "revive_fossil");
+        List<String> obtainingMethods = List.of("catch", "evolve-into", "trade_for", "obtain", "revive_fossil");
         if (CobblemonQuestsConfig.ignoredPokemon.contains(pokemon.getSpecies().toString().toLowerCase())) return;
         if (actions.contains(executedAction) || (actions.contains("obtain") && obtainingMethods.contains(executedAction))) {
             Level world = player.level();

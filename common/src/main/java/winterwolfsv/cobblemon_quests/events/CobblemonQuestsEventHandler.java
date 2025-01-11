@@ -138,16 +138,16 @@ public class CobblemonQuestsEventHandler {
                 ServerPlayer player1 = players.get(0);
                 ServerPlayer player2 = players.get(1);
                 if (player1.getUUID().equals(battleVictoryEvent.getWinners().getFirst().getUuid())) {
-                    processTasksForTeam(player2.getName().getString(), "defeat-player", 1, player1);
+                    processTasksForTeam(player2.getName().getString(), "defeat_player", 1, player1);
                 } else {
-                    processTasksForTeam(player1.getName().getString(), "defeat-player", 1, player2);
+                    processTasksForTeam(player1.getName().getString(), "defeat_player", 1, player2);
                 }
             }
             ServerPlayer player = players.getFirst();
             if (!player.getUUID().equals(battleVictoryEvent.getWinners().getFirst().getUuid())) return Unit.INSTANCE;
             for (BattleActor actor : battleVictoryEvent.getBattle().getActors()) {
                 if (actor.getType() == ActorType.NPC) {
-                    processTasksForTeam(actor.getName().getString(), "defeat-npc", 1, player);
+                    processTasksForTeam(actor.getName().getString(), "defeat_npc", 1, player);
                     break;
                 }
                 if (actor.getType() == ActorType.WILD) {
@@ -208,7 +208,7 @@ public class CobblemonQuestsEventHandler {
         try {
             Pokemon pokemon = evolutionCompleteEvent.getPokemon();
             ServerPlayer player = pokemon.getOwnerPlayer();
-            processTasksForTeam(pokemon, "evolve-into", 1, player);
+            processTasksForTeam(pokemon, "evolve_into", 1, player);
             return pokemonCatch(pokemon, pokemon.getOwnerPlayer());
         } catch (Exception e) {
             CobblemonQuests.LOGGER.warning("Error processing evolution complete event " + Arrays.toString(e.getStackTrace()));
