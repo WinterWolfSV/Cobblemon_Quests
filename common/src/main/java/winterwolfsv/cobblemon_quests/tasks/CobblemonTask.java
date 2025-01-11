@@ -2,6 +2,8 @@ package winterwolfsv.cobblemon_quests.tasks;
 
 import com.cobblemon.mod.common.CobblemonItemComponents;
 import com.cobblemon.mod.common.api.pokeball.PokeBalls;
+import com.cobblemon.mod.common.api.pokemon.PokemonSpecies;
+import com.cobblemon.mod.common.api.types.ElementalType;
 import com.cobblemon.mod.common.item.components.PokemonItemComponent;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import dev.ftb.mods.ftblibrary.config.*;
@@ -179,10 +181,12 @@ public class CobblemonTask extends Task {
         RegistryAccess registryManager = Minecraft.getInstance().level.registryAccess();
         addConfigList(config, "actions", actions, actionList, null, null);
         Function<String, String> pokemonNameProcessor = (name) -> name.split(":")[0] + ".species." + name.split(":")[1] + ".name";
+        List<String> pokemonList = PokemonSpecies.INSTANCE.getSpecies().stream().map(species -> species.resourceIdentifier.toString()).sorted().toList();
         addConfigList(config, "pokemons", pokemons, pokemonList, this::getPokemonIcon, pokemonNameProcessor);
         config.addLong("amount", amount, v -> amount = v, 1L, 1L, Long.MAX_VALUE).setNameKey(MOD_ID + ".task.amount");
         config.addBool("shiny", shiny, v -> shiny = v, false).setNameKey(MOD_ID + ".task.shiny");
         Function<String, String> pokeBallNameProcessor = (name) -> "item." + name.replace(":", ".");
+        List<String> pokeBallList = PokeBalls.INSTANCE.all().stream().map(pokeBall -> pokeBall.getName().toString()).sorted().toList();
         addConfigList(config, "pokeballs", pokeBallsUsed, pokeBallList, this::getIconFromIdentifier, pokeBallNameProcessor);
         addConfigList(config, "forms", forms, formList, null, null);
         addConfigList(config, "genders", genders, genderList, null, null);
@@ -291,10 +295,10 @@ public class CobblemonTask extends Task {
         // give @s cobblemon:pokemon_model[cobblemon:pokemon_item={species:"cobblemon:<pokemon_name>",aspects:[]}]
     }
 
-    public void CobblemonTaskIncrease(TeamData teamData, Pokemon pokemon, String executedAction, long progress, ServerPlayer player) {
-        String[] obtainingMethods = {"catch", "evolve", "trade_for", "obtain", "revive_fossil"};
+    public void increase(TeamData teamData, Pokemon pokemon, String executedAction, long progress, ServerPlayer player) {
+        List<String> obtainingMethods = List.of("catch", "evolve", "trade_for", "obtain", "revive_fossil");
         if (CobblemonQuestsConfig.ignoredPokemon.contains(pokemon.getSpecies().toString().toLowerCase())) return;
-        if (actions.contains(executedAction) || (actions.contains("obtain") && Arrays.asList(obtainingMethods).contains(executedAction))) {
+        if (actions.contains(executedAction) || (actions.contains("obtain") && obtainingMethods.contains(executedAction))) {
             Level world = player.level();
             // Check region
             if (!regions.isEmpty()) {
@@ -350,19 +354,19 @@ public class CobblemonTask extends Task {
                         break;
                     }
                 }
-                if(!flag) return;
+                if (!flag) return;
             }
 
             // Check type
             if (!pokemonTypes.isEmpty()) {
-                List<String> types = new ArrayList<>();
-                pokemon.getTypes().iterator().forEachRemaining(type -> {
-                    String typeName = type.getName().toLowerCase();
-                    if (pokemonTypes.contains(typeName)) types.add(typeName);
-                });
-                if (types.isEmpty()) {
-                    return;
+                boolean flag = false;
+                for (ElementalType type : pokemon.getTypes()) {
+                    if (pokemonTypes.contains(type.getName().toLowerCase())) {
+                        flag = true;
+                        break;
+                    }
                 }
+                if (!flag) return;
             }
 
             // Check shiny
@@ -378,6 +382,15 @@ public class CobblemonTask extends Task {
                 }
                 teamData.addProgress(this, progress);
             }
+        }
+    }
+
+    // data is a string that should match an entry in the chosen pokemon list. The data is entered (comma separated) in the form field.
+    public void increaseWoPokemon(TeamData teamData, String data, String executedAction, long progress) {
+        System.out.println(data + " " + executedAction + " " + progress + " " + forms);
+        if (actions.contains(executedAction) && forms.contains(data) || forms.isEmpty()) {
+            System.out.println("Adding progress");
+            teamData.addProgress(this, progress);
         }
     }
 }

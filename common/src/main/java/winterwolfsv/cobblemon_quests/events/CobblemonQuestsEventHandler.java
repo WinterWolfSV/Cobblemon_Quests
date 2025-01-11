@@ -1,6 +1,7 @@
 package winterwolfsv.cobblemon_quests.events;
 
 import com.cobblemon.mod.common.api.Priority;
+import com.cobblemon.mod.common.api.battles.model.actor.ActorType;
 import com.cobblemon.mod.common.api.battles.model.actor.BattleActor;
 import com.cobblemon.mod.common.api.events.CobblemonEvents;
 import com.cobblemon.mod.common.api.events.battles.BattleVictoryEvent;
@@ -30,11 +31,11 @@ import winterwolfsv.cobblemon_quests.CobblemonQuests;
 import winterwolfsv.cobblemon_quests.tasks.CobblemonTask;
 
 import java.util.*;
+import java.util.List;
 
 public class CobblemonQuestsEventHandler {
     private List<CobblemonTask> pokemonTasks = null;
     private UUID lastPokemonUuid = null;
-    private Set<String> lastAction = new HashSet<>();
 
     public CobblemonQuestsEventHandler init() {
         EntityEvent.LIVING_DEATH.register(this::entityKill);
@@ -59,8 +60,9 @@ public class CobblemonQuestsEventHandler {
                 return Unit.INSTANCE;
             }
             Pokemon pokemon = ((PokemonEntity) pokemonScannedEvent.getScannedEntity()).getPokemon();
+            if(lastPokemonUuid == pokemon.getUuid()) return Unit.INSTANCE;
+            lastPokemonUuid = pokemon.getUuid();
             ServerPlayer player = pokemonScannedEvent.getPlayer();
-            System.out.println("Pokemon scanned: " + pokemon.getSpecies().getName());
             processTasksForTeam(pokemon, "scan", 1, player);
         } catch (Exception e) {
             CobblemonQuests.LOGGER.warning("Error processing scan event " + Arrays.toString(e.getStackTrace()));
@@ -130,18 +132,31 @@ public class CobblemonQuestsEventHandler {
     private Unit pokemonBattleVictory(BattleVictoryEvent battleVictoryEvent) {
         try {
             List<ServerPlayer> players = battleVictoryEvent.getBattle().getPlayers();
-            // Ensures that the battle is only player vs npc and not player vs player
-            if (players.size() != 1) return Unit.INSTANCE;
+            if (players.isEmpty())
+                return Unit.INSTANCE; // Not sure why no players would be in the battle, but better safe than sorry
+            if (players.size() == 2) {
+                ServerPlayer player1 = players.get(0);
+                ServerPlayer player2 = players.get(1);
+                if (player1.getUUID().equals(battleVictoryEvent.getWinners().getFirst().getUuid())) {
+                    processTasksForTeam(player2.getName().getString(), "defeat-player", 1, player1);
+                } else {
+                    processTasksForTeam(player1.getName().getString(), "defeat-player", 1, player2);
+                }
+            }
             ServerPlayer player = players.getFirst();
-            if (!player.getName().equals(battleVictoryEvent.getWinners().getFirst().getName())) return Unit.INSTANCE;
-            Iterable<BattleActor> battleActors = battleVictoryEvent.getBattle().getActors();
-            for (BattleActor actor : battleActors) {
-                // Checks if the pokemon is the last pokemon that was caught. Done to bypass an issue with two events being
-                // fired for the same pokemon and adding progress to catch and defeat tasks.
-                if (actor.getPokemonList().getFirst().getEffectedPokemon().getUuid() == lastPokemonUuid)
-                    return Unit.INSTANCE;
-                if (actor != battleVictoryEvent.getWinners().getFirst()) {
+            if (!player.getUUID().equals(battleVictoryEvent.getWinners().getFirst().getUuid())) return Unit.INSTANCE;
+            for (BattleActor actor : battleVictoryEvent.getBattle().getActors()) {
+                if (actor.getType() == ActorType.NPC) {
+                    processTasksForTeam(actor.getName().getString(), "defeat-npc", 1, player);
+                    break;
+                }
+                if (actor.getType() == ActorType.WILD) {
+                    // Checks if the Pokémon is the last Pokémon that was caught. Done to bypass an issue with two events being
+                    // fired for the same Pokémon and adding progress to catch and defeat tasks.
+                    if (actor.getPokemonList().getFirst().getEffectedPokemon().getUuid() == lastPokemonUuid)
+                        return Unit.INSTANCE;
                     processTasksForTeam(actor.getPokemonList().getFirst().getEffectedPokemon(), "defeat", 1, player);
+                    break;
                 }
             }
         } catch (Exception e) {
@@ -225,25 +240,39 @@ public class CobblemonQuestsEventHandler {
     }
 
     public void processTasksForTeam(Pokemon pokemon, String action, long amount, ServerPlayer player) {
-        if(player == null) return;
-        Set<String> currentAction = new HashSet<>(List.of(pokemon.getUuid().toString(), player.getStringUUID(), action));
-        if (currentAction.equals(lastAction)) return;
-        lastAction = currentAction;
         try {
-            if (this.pokemonTasks == null) {
-                this.pokemonTasks = ServerQuestFile.INSTANCE.collect(CobblemonTask.class);
-            }
-            if (this.pokemonTasks.isEmpty()) return;
-            Team team = TeamManagerImpl.INSTANCE.getTeamForPlayer(player).orElse(null);
-            if (team == null) return;
-            TeamData data = ServerQuestFile.INSTANCE.getOrCreateTeamData(team);
+            TeamData teamData = getTeamData(player);
+            if(teamData == null) return;
             for (CobblemonTask task : pokemonTasks) {
-                if (data.getProgress(task) < task.getMaxProgress() && data.canStartTasks(task.getQuest())) {
-                    task.CobblemonTaskIncrease(data, pokemon, action, amount, player);
+                if (teamData.getProgress(task) < task.getMaxProgress() && teamData.canStartTasks(task.getQuest())) {
+                    task.increase(teamData, pokemon, action, amount, player);
                 }
             }
         } catch (Exception e) {
-            CobblemonQuests.LOGGER.warning("Error processing task for team " + Arrays.toString(e.getStackTrace()));
+            CobblemonQuests.LOGGER.warning("(1) Error processing task for team " + Arrays.toString(e.getStackTrace()));
         }
+    }
+
+    public void processTasksForTeam(String data, String action, long amount, ServerPlayer player) {
+        try {
+            TeamData teamData = getTeamData(player);
+            if(teamData == null) return;
+            for (CobblemonTask task : pokemonTasks) {
+                if (teamData.getProgress(task) < task.getMaxProgress() && teamData.canStartTasks(task.getQuest())) {
+                    task.increaseWoPokemon(teamData, data, action, amount);
+                }
+            }
+        } catch (Exception e) {
+            CobblemonQuests.LOGGER.warning("(2) Error processing task for team " + Arrays.toString(e.getStackTrace()));
+        }
+    }
+    private TeamData getTeamData(ServerPlayer player) {
+        if(this.pokemonTasks == null) {
+            this.pokemonTasks = ServerQuestFile.INSTANCE.collect(CobblemonTask.class);
+        }
+        if(this.pokemonTasks.isEmpty()) return null;
+        Team team = TeamManagerImpl.INSTANCE.getTeamForPlayer(player).orElse(null);
+        if (team == null) return null;
+        return ServerQuestFile.INSTANCE.getOrCreateTeamData(team);
     }
 }
