@@ -6,7 +6,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import winterwolfsv.cobblemon_quests.tasks.CobblemonTask;
+import winterwolfsv.cobblemon_quests.tasks.TaskData;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,7 +15,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class ActionListArgumentType implements ArgumentType<List<String>> {
 
-    private final List<String> values = CobblemonTask.actionList;
+    private final List<String> values = TaskData.actionList;
     private final char delimiter = ',';
 
     public static ActionListArgumentType actionList() {

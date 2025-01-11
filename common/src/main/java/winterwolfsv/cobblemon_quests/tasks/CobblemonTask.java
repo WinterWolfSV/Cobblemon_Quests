@@ -37,13 +37,12 @@ import static winterwolfsv.cobblemon_quests.CobblemonQuests.MOD_ID;
 import static winterwolfsv.cobblemon_quests.tasks.TaskData.*;
 
 public class CobblemonTask extends Task {
-    public static final List<String> actionList = Arrays.asList("catch", "defeat", "evolve", "kill", "level_up", "level_up_to", "release", "trade_away", "trade_for", "obtain", "select_starter", "revive_fossil");
     public Icon pokeBallIcon = ItemIcon.getItemIcon(PokeBalls.INSTANCE.getPOKE_BALL().item());
     public long amount = 1L;
     public boolean shiny = false;
     public long timeMin = 0;
     public long timeMax = 24000;
-    public ArrayList<String> actions = new ArrayList<>(List.of("catch"));
+    public ArrayList<String> actions = new ArrayList<>();
     public ArrayList<String> biomes = new ArrayList<>();
     public ArrayList<String> dimensions = new ArrayList<>();
     public ArrayList<String> forms = new ArrayList<>();
@@ -74,15 +73,15 @@ public class CobblemonTask extends Task {
         nbt.putBoolean("shiny", shiny);
         nbt.putLong("time_min", timeMin);
         nbt.putLong("time_max", timeMax);
-        nbt.putString("action", writeArrayList(actions));
-        nbt.putString("biome", writeArrayList(biomes));
-        nbt.putString("dimension", writeArrayList(dimensions));
-        nbt.putString("pokemon", writeArrayList(pokemons));
-        nbt.putString("form", writeArrayList(forms));
-        nbt.putString("gender", writeArrayList(genders));
-        nbt.putString("poke_ball_used", writeArrayList(pokeBallsUsed));
-        nbt.putString("pokemon_type", writeArrayList(pokemonTypes));
-        nbt.putString("region", writeArrayList(regions));
+        nbt.putString("action", writeList(actions));
+        nbt.putString("biome", writeList(biomes));
+        nbt.putString("dimension", writeList(dimensions));
+        nbt.putString("pokemon", writeList(pokemons));
+        nbt.putString("form", writeList(forms));
+        nbt.putString("gender", writeList(genders));
+        nbt.putString("poke_ball_used", writeList(pokeBallsUsed));
+        nbt.putString("pokemon_type", writeList(pokemonTypes));
+        nbt.putString("region", writeList(regions));
     }
 
     @Override
@@ -92,15 +91,15 @@ public class CobblemonTask extends Task {
         shiny = nbt.getBoolean("shiny");
         timeMin = nbt.getLong("time_min");
         timeMax = nbt.getLong("time_max");
-        actions = readArrayList(nbt.getString("action"));
-        biomes = readArrayList(nbt.getString("biome"));
-        dimensions = readArrayList(nbt.getString("dimension"));
-        pokemons = readArrayList(nbt.getString("pokemon"));
-        forms = readArrayList(nbt.getString("form"));
-        genders = readArrayList(nbt.getString("gender"));
-        pokeBallsUsed = readArrayList(nbt.getString("poke_ball_used"));
-        pokemonTypes = readArrayList(nbt.getString("pokemon_type"));
-        regions = readArrayList(nbt.getString("region"));
+        actions = readList(nbt.getString("action"));
+        biomes = readList(nbt.getString("biome"));
+        dimensions = readList(nbt.getString("dimension"));
+        pokemons = readList(nbt.getString("pokemon"));
+        forms = readList(nbt.getString("form"));
+        genders = readList(nbt.getString("gender"));
+        pokeBallsUsed = readList(nbt.getString("poke_ball_used"));
+        pokemonTypes = readList(nbt.getString("pokemon_type"));
+        regions = readList(nbt.getString("region"));
 
         if (!forms.isEmpty()) {
             Map<String, String> formReplacements = Map.of(
@@ -118,7 +117,7 @@ public class CobblemonTask extends Task {
             amount = nbt.getLong("value");
         }
         if (nbt.contains("entity")) {
-            pokemons = readArrayList(nbt.getString("entity"));
+            pokemons = readList(nbt.getString("entity"));
         }
         if (amount == 0) {
             amount = 1;
@@ -133,15 +132,15 @@ public class CobblemonTask extends Task {
         buffer.writeBoolean(shiny);
         buffer.writeLong(timeMin);
         buffer.writeLong(timeMax);
-        buffer.writeUtf(writeArrayList(pokemons), Short.MAX_VALUE);
-        buffer.writeUtf(writeArrayList(actions), Short.MAX_VALUE);
-        buffer.writeUtf(writeArrayList(biomes), Short.MAX_VALUE);
-        buffer.writeUtf(writeArrayList(dimensions), Short.MAX_VALUE);
-        buffer.writeUtf(writeArrayList(forms), Short.MAX_VALUE);
-        buffer.writeUtf(writeArrayList(genders), Short.MAX_VALUE);
-        buffer.writeUtf(writeArrayList(pokeBallsUsed), Short.MAX_VALUE);
-        buffer.writeUtf(writeArrayList(pokemonTypes), Short.MAX_VALUE);
-        buffer.writeUtf(writeArrayList(regions), Short.MAX_VALUE);
+        buffer.writeUtf(writeList(pokemons), Short.MAX_VALUE);
+        buffer.writeUtf(writeList(actions), Short.MAX_VALUE);
+        buffer.writeUtf(writeList(biomes), Short.MAX_VALUE);
+        buffer.writeUtf(writeList(dimensions), Short.MAX_VALUE);
+        buffer.writeUtf(writeList(forms), Short.MAX_VALUE);
+        buffer.writeUtf(writeList(genders), Short.MAX_VALUE);
+        buffer.writeUtf(writeList(pokeBallsUsed), Short.MAX_VALUE);
+        buffer.writeUtf(writeList(pokemonTypes), Short.MAX_VALUE);
+        buffer.writeUtf(writeList(regions), Short.MAX_VALUE);
     }
 
     @Override
@@ -151,24 +150,23 @@ public class CobblemonTask extends Task {
         shiny = buffer.readBoolean();
         timeMin = buffer.readLong();
         timeMax = buffer.readLong();
-        pokemons = readArrayList(buffer.readUtf(Short.MAX_VALUE));
-        actions = readArrayList(buffer.readUtf(Short.MAX_VALUE));
-        biomes = readArrayList(buffer.readUtf(Short.MAX_VALUE));
-        dimensions = readArrayList(buffer.readUtf(Short.MAX_VALUE));
-        forms = readArrayList(buffer.readUtf(Short.MAX_VALUE));
-        genders = readArrayList(buffer.readUtf(Short.MAX_VALUE));
-        pokeBallsUsed = readArrayList(buffer.readUtf(Short.MAX_VALUE));
-        pokemonTypes = readArrayList(buffer.readUtf(Short.MAX_VALUE));
-        regions = readArrayList(buffer.readUtf(Short.MAX_VALUE));
+        pokemons = readList(buffer.readUtf(Short.MAX_VALUE));
+        actions = readList(buffer.readUtf(Short.MAX_VALUE));
+        biomes = readList(buffer.readUtf(Short.MAX_VALUE));
+        dimensions = readList(buffer.readUtf(Short.MAX_VALUE));
+        forms = readList(buffer.readUtf(Short.MAX_VALUE));
+        genders = readList(buffer.readUtf(Short.MAX_VALUE));
+        pokeBallsUsed = readList(buffer.readUtf(Short.MAX_VALUE));
+        pokemonTypes = readList(buffer.readUtf(Short.MAX_VALUE));
+        regions = readList(buffer.readUtf(Short.MAX_VALUE));
     }
 
-    public String writeArrayList(ArrayList<String> list) {
+    public String writeList(ArrayList<String> list) {
         list.removeIf(Objects::isNull);
-        list = new ArrayList<>(new LinkedHashSet<>(list));
         return String.join(",", list);
     }
 
-    public ArrayList<String> readArrayList(String s) {
+    public ArrayList<String> readList(String s) {
         return Arrays.stream(s.split(",")).map(String::trim).filter(obj -> !obj.isEmpty() && !obj.contains("choice_any")).distinct().collect(Collectors.toCollection(ArrayList::new));
     }
 

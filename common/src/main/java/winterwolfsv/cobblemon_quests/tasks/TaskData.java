@@ -45,9 +45,9 @@ public class TaskData {
             "magikarp-jump-violet-raindrops",
             "magikarp-jump-violet-saucy"
     );
+    public static final List<String> actionList = Arrays.asList("catch", "defeat", "evolve", "kill", "level_up", "level_up_to", "release", "trade_away", "trade_for", "obtain", "select_starter", "revive_fossil");
     public static final List<String> pokemonList = new ArrayList<>(PokemonSpecies.INSTANCE.getSpecies().stream().map(species -> species.resourceIdentifier.toString()).sorted().toList());
     public static final List<String> pokeBallList = new ArrayList<>(PokeBalls.INSTANCE.all().stream().map(pokeBall -> pokeBall.getName().toString()).sorted().toList());
-    //    public static final List<String> formList = Arrays.asList("normal", "alola", "galar", "paldea", "hisui");
     public static final List<String> genderList = Arrays.asList("male", "female", "genderless");
     public static final List<String> pokemonTypeList = Arrays.asList("normal", "fire", "water", "grass", "electric", "ice", "fighting", "poison", "ground", "flying", "psychic", "bug", "rock", "ghost", "dragon", "dark", "steel", "fairy");
     public static final List<String> regionList = Arrays.asList("gen1", "gen2", "gen3", "gen4", "gen5", "gen6", "gen7", "gen8", "gen9");
