@@ -2,7 +2,6 @@ package winterwolfsv.cobblemon_quests.tasks;
 
 import com.cobblemon.mod.common.CobblemonItemComponents;
 import com.cobblemon.mod.common.api.pokeball.PokeBalls;
-import com.cobblemon.mod.common.api.pokemon.PokemonSpecies;
 import com.cobblemon.mod.common.item.components.PokemonItemComponent;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import dev.ftb.mods.ftblibrary.config.*;
@@ -35,6 +34,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static winterwolfsv.cobblemon_quests.CobblemonQuests.MOD_ID;
+import static winterwolfsv.cobblemon_quests.tasks.TaskData.*;
 
 public class CobblemonTask extends Task {
     public static final List<String> actionList = Arrays.asList("catch", "defeat", "evolve", "kill", "level_up", "level_up_to", "release", "trade_away", "trade_for", "obtain", "select_starter", "revive_fossil");
@@ -101,6 +101,16 @@ public class CobblemonTask extends Task {
         pokeBallsUsed = readArrayList(nbt.getString("poke_ball_used"));
         pokemonTypes = readArrayList(nbt.getString("pokemon_type"));
         regions = readArrayList(nbt.getString("region"));
+
+        if (!forms.isEmpty()) {
+            Map<String, String> formReplacements = Map.of(
+                    "alola", "alolan",
+                    "galar", "galarian",
+                    "paldea", "paldean",
+                    "hisui", "hisuian"
+            );
+            forms.replaceAll(form -> formReplacements.getOrDefault(form, form));
+        }
         if (timeMin == timeMax && timeMin == 0) {
             timeMax = 24000;
         }
@@ -171,23 +181,15 @@ public class CobblemonTask extends Task {
         RegistryAccess registryManager = Minecraft.getInstance().level.registryAccess();
         addConfigList(config, "actions", actions, actionList, null, null);
         Function<String, String> pokemonNameProcessor = (name) -> name.split(":")[0] + ".species." + name.split(":")[1] + ".name";
-        List<String> pokemonList = new ArrayList<>(PokemonSpecies.INSTANCE.getSpecies().stream().map(species -> species.resourceIdentifier.toString()).toList());
-        Collections.sort(pokemonList);
         addConfigList(config, "pokemons", pokemons, pokemonList, this::getPokemonIcon, pokemonNameProcessor);
         config.addLong("amount", amount, v -> amount = v, 1L, 1L, Long.MAX_VALUE).setNameKey(MOD_ID + ".task.amount");
         config.addBool("shiny", shiny, v -> shiny = v, false).setNameKey(MOD_ID + ".task.shiny");
         Function<String, String> pokeBallNameProcessor = (name) -> "item." + name.replace(":", ".");
-        List<String> pokeBallList = new ArrayList<>(PokeBalls.INSTANCE.all().stream().map(pokeBall -> pokeBall.getName().toString()).toList());
-        Collections.sort(pokeBallList);
         addConfigList(config, "pokeballs", pokeBallsUsed, pokeBallList, this::getIconFromIdentifier, pokeBallNameProcessor);
-        List<String> formList = Arrays.asList("normal", "alola", "galar", "paldea", "hisui");
         addConfigList(config, "forms", forms, formList, null, null);
-        List<String> genderList = Arrays.asList("male", "female", "genderless");
         addConfigList(config, "genders", genders, genderList, null, null);
         Function<String, String> pokemonTypeNameProcessor = (name) -> "cobblemon.type." + name;
-        List<String> pokemonTypeList = Arrays.asList("normal", "fire", "water", "grass", "electric", "ice", "fighting", "poison", "ground", "flying", "psychic", "bug", "rock", "ghost", "dragon", "dark", "steel", "fairy");
         addConfigList(config, "pokemon_types", pokemonTypes, pokemonTypeList, null, pokemonTypeNameProcessor);
-        List<String> regionList = Arrays.asList("gen1", "gen2", "gen3", "gen4", "gen5", "gen6", "gen7", "gen8", "gen9");
         addConfigList(config, "regions", regions, regionList, null, null);
         Function<String, String> biomeAndDimensionNameProcessor = (name) -> "(" + name.replace("_", " ").replace(":", ") ");
         List<String> biomeList = registryManager.registryOrThrow(Registries.BIOME).entrySet().stream().map(entry -> entry.getKey().location().toString()).toList();
@@ -200,8 +202,8 @@ public class CobblemonTask extends Task {
     }
 
     private void addConfigList(ConfigGroup config, String listName, List<String> listData, List<String> optionsList, Function<ResourceLocation, Icon> iconProcessor, Function<String, String> nameProcessor) {
-        NameMap<String> nameMap = NameMap.of(optionsList.get(0), optionsList).id(s -> s).name(s -> Component.translatable(nameProcessor == null ? MOD_ID + "." + listName + "." + s : nameProcessor.apply(s))).icon(s -> iconProcessor == null ? pokeBallIcon : iconProcessor.apply(ResourceLocation.parse(s))).create();
-        config.addList(listName, listData, new EnumConfig<>(nameMap), optionsList.get(optionsList.size() - 1)).setNameKey(MOD_ID + ".task." + listName);
+        NameMap<String> nameMap = NameMap.of(optionsList.getFirst(), optionsList).id(s -> s).name(s -> Component.translatable(nameProcessor == null ? MOD_ID + "." + listName + "." + s : nameProcessor.apply(s))).icon(s -> iconProcessor == null ? pokeBallIcon : iconProcessor.apply(ResourceLocation.parse(s))).create();
+        config.addList(listName, listData, new EnumConfig<>(nameMap), optionsList.getLast()).setNameKey(MOD_ID + ".task." + listName);
     }
 
     @Override
@@ -264,7 +266,7 @@ public class CobblemonTask extends Task {
         if (pokemons.isEmpty()) {
             return pokeBallIcon;
         }
-        return getPokemonIcon(ResourceLocation.parse(pokemons.get(0)));
+        return getPokemonIcon(ResourceLocation.parse(pokemons.getFirst()));
     }
 
 
@@ -343,10 +345,16 @@ public class CobblemonTask extends Task {
             }
             // Check form
             if (!forms.isEmpty()) {
-                if (!forms.contains(pokemon.getForm().getName().toLowerCase())) {
-                    return;
+                boolean flag = forms.contains(pokemon.getForm().getName().toLowerCase());
+                for (String aspect : pokemon.getAspects()) {
+                    if (forms.contains(aspect)) {
+                        flag = true;
+                        break;
+                    }
                 }
+                if(!flag) return;
             }
+
             // Check type
             if (!pokemonTypes.isEmpty()) {
                 List<String> types = new ArrayList<>();
