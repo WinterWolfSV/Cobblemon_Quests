@@ -207,6 +207,8 @@ public class CobblemonQuestsEventHandler {
     private Unit pokemonEvolutionComplete(EvolutionCompleteEvent evolutionCompleteEvent) {
         try {
             Pokemon pokemon = evolutionCompleteEvent.getPokemon();
+            ServerPlayer player = pokemon.getOwnerPlayer();
+            processTasksForTeam(pokemon, "evolve-into", 1, player);
             return pokemonCatch(pokemon, pokemon.getOwnerPlayer());
         } catch (Exception e) {
             CobblemonQuests.LOGGER.warning("Error processing evolution complete event " + Arrays.toString(e.getStackTrace()));
