@@ -2,10 +2,13 @@ package winterwolfsv.cobblemon_quests.tasks;
 
 import com.cobblemon.mod.common.CobblemonItemComponents;
 import com.cobblemon.mod.common.api.pokeball.PokeBalls;
+import com.cobblemon.mod.common.api.pokedex.PokedexManager;
+import com.cobblemon.mod.common.api.pokedex.SpeciesDexRecord;
 import com.cobblemon.mod.common.api.pokemon.PokemonSpecies;
 import com.cobblemon.mod.common.api.types.ElementalType;
 import com.cobblemon.mod.common.item.components.PokemonItemComponent;
 import com.cobblemon.mod.common.pokemon.Pokemon;
+import com.cobblemon.mod.common.pokemon.Species;
 import dev.ftb.mods.ftblibrary.config.*;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
@@ -297,8 +300,8 @@ public class CobblemonTask extends Task {
 
     public void increase(TeamData teamData, Pokemon pokemon, String executedAction, long progress, ServerPlayer player) {
         List<String> obtainingMethods = List.of("catch", "evolve-into", "trade_for", "obtain", "revive_fossil");
-        if (CobblemonQuestsConfig.ignoredPokemon.contains(pokemon.getSpecies().toString().toLowerCase())) return;
         if (actions.contains(executedAction) || (actions.contains("obtain") && obtainingMethods.contains(executedAction))) {
+            if (CobblemonQuestsConfig.ignoredPokemon.contains(pokemon.getSpecies().toString().toLowerCase())) return;
             Level world = player.level();
             // Check region
             if (!regions.isEmpty()) {
@@ -385,11 +388,65 @@ public class CobblemonTask extends Task {
         }
     }
 
-    // data is a string that should match an entry in the chosen pokemon list. The data is entered (comma separated) in the form field.
+    public void increaseHaveRegistered(TeamData teamData, PokedexManager pokedexManager) {
+        if (!this.actions.contains("have_registered")) return;
+        if (teamData.isCompleted(this)) return;
+        long progress = 0;
+        Map<ResourceLocation, SpeciesDexRecord> dexRecords = pokedexManager.getSpeciesRecords();
+        for (ResourceLocation record : dexRecords.keySet()) {
+            if (!pokemons.isEmpty() && !pokemons.contains(record.toString())) continue;
+            Set<String> aspects = dexRecords.get(record).getAspects();
+            boolean flag = false;
+            if (shiny) {
+                if (!aspects.contains("shiny")) return;
+            }
+            if (!genders.isEmpty()) {
+                for (String gender : genders) {
+                    if (aspects.contains(gender)) {
+                        flag = true;
+                        break;
+                    }
+                }
+                if (!flag) return;
+                flag = false;
+            }
+            if (!forms.isEmpty()) {
+                for (String form : forms) {
+                    if (aspects.contains(form)) {
+                        flag = true;
+                        break;
+                    }
+                }
+                if (!flag) return;
+                flag = false;
+            }
+
+            Species species = PokemonSpecies.INSTANCE.getByIdentifier(record);
+            if (species == null) return;
+
+            if (!regions.isEmpty()) {
+                if (!regions.contains(species.getLabels().toArray()[0].toString())) {
+                    return;
+                }
+            }
+
+            if (!pokemonTypes.isEmpty()) {
+                for (ElementalType type : species.getTypes()) {
+                    if (pokemonTypes.contains(type.getName().toLowerCase())) {
+                        flag = true;
+                        break;
+                    }
+                }
+                if (!flag) return;
+            }
+            progress += 1;
+        }
+        teamData.setProgress(this, progress);
+    }
+
+    // data is a string that should match an entry in the (comma separated) form field.
     public void increaseWoPokemon(TeamData teamData, String data, String executedAction, long progress) {
-        System.out.println(data + " " + executedAction + " " + progress + " " + forms);
         if (actions.contains(executedAction) && forms.contains(data) || forms.isEmpty()) {
-            System.out.println("Adding progress");
             teamData.addProgress(this, progress);
         }
     }

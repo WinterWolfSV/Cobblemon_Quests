@@ -1,5 +1,6 @@
 package winterwolfsv.cobblemon_quests.events;
 
+import com.cobblemon.mod.common.Cobblemon;
 import com.cobblemon.mod.common.api.Priority;
 import com.cobblemon.mod.common.api.battles.model.actor.ActorType;
 import com.cobblemon.mod.common.api.battles.model.actor.BattleActor;
@@ -12,10 +13,12 @@ import com.cobblemon.mod.common.api.events.pokemon.evolution.EvolutionAcceptedEv
 import com.cobblemon.mod.common.api.events.pokemon.evolution.EvolutionCompleteEvent;
 import com.cobblemon.mod.common.api.events.starter.StarterChosenEvent;
 import com.cobblemon.mod.common.api.events.storage.ReleasePokemonEvent;
+import com.cobblemon.mod.common.api.pokedex.PokedexManager;
 import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import dev.architectury.event.EventResult;
 import dev.architectury.event.events.common.EntityEvent;
+import dev.architectury.event.events.common.PlayerEvent;
 import dev.architectury.hooks.level.entity.PlayerHooks;
 import dev.ftb.mods.ftbquests.api.QuestFile;
 import dev.ftb.mods.ftbquests.events.ClearFileCacheEvent;
@@ -34,7 +37,7 @@ import java.util.*;
 import java.util.List;
 
 public class CobblemonQuestsEventHandler {
-    private List<CobblemonTask> pokemonTasks = null;
+    private HashSet<CobblemonTask> pokemonTasks = null;
     private UUID lastPokemonUuid = null;
 
     public CobblemonQuestsEventHandler init() {
@@ -51,7 +54,21 @@ public class CobblemonQuestsEventHandler {
         CobblemonEvents.FOSSIL_REVIVED.subscribe(Priority.LOWEST, this::fossilRevived);
         CobblemonEvents.BOBBER_SPAWN_POKEMON_POST.subscribe(Priority.LOWEST, this::pokemonBobberSpawn);
         CobblemonEvents.POKEMON_SCANNED.subscribe(Priority.LOWEST, this::pokemonScan);
+        PlayerEvent.PLAYER_JOIN.register((this::playerJoin));
         return this;
+    }
+
+    private void playerJoin(ServerPlayer player) {
+        try {
+            TeamData teamData = getTeamData(player);
+            if (teamData == null) return;
+            PokedexManager pokedexManager = Cobblemon.playerDataManager.getPokedexData(player);
+            for (CobblemonTask task : pokemonTasks) {
+                task.increaseHaveRegistered(teamData, pokedexManager);
+            }
+        } catch (Exception e) {
+            CobblemonQuests.LOGGER.warning("Error adding caught pokemon to the dex " + Arrays.toString(e.getStackTrace()));
+        }
     }
 
     private Unit pokemonScan(PokemonScannedEvent pokemonScannedEvent) {
@@ -60,7 +77,7 @@ public class CobblemonQuestsEventHandler {
                 return Unit.INSTANCE;
             }
             Pokemon pokemon = ((PokemonEntity) pokemonScannedEvent.getScannedEntity()).getPokemon();
-            if(lastPokemonUuid == pokemon.getUuid()) return Unit.INSTANCE;
+            if (lastPokemonUuid == pokemon.getUuid()) return Unit.INSTANCE;
             lastPokemonUuid = pokemon.getUuid();
             ServerPlayer player = pokemonScannedEvent.getPlayer();
             processTasksForTeam(pokemon, "scan", 1, player);
@@ -244,7 +261,7 @@ public class CobblemonQuestsEventHandler {
     public void processTasksForTeam(Pokemon pokemon, String action, long amount, ServerPlayer player) {
         try {
             TeamData teamData = getTeamData(player);
-            if(teamData == null) return;
+            if (teamData == null) return;
             for (CobblemonTask task : pokemonTasks) {
                 if (teamData.getProgress(task) < task.getMaxProgress() && teamData.canStartTasks(task.getQuest())) {
                     task.increase(teamData, pokemon, action, amount, player);
@@ -258,7 +275,7 @@ public class CobblemonQuestsEventHandler {
     public void processTasksForTeam(String data, String action, long amount, ServerPlayer player) {
         try {
             TeamData teamData = getTeamData(player);
-            if(teamData == null) return;
+            if (teamData == null) return;
             for (CobblemonTask task : pokemonTasks) {
                 if (teamData.getProgress(task) < task.getMaxProgress() && teamData.canStartTasks(task.getQuest())) {
                     task.increaseWoPokemon(teamData, data, action, amount);
@@ -268,11 +285,12 @@ public class CobblemonQuestsEventHandler {
             CobblemonQuests.LOGGER.warning("(2) Error processing task for team " + Arrays.toString(e.getStackTrace()));
         }
     }
+
     private TeamData getTeamData(ServerPlayer player) {
-        if(this.pokemonTasks == null) {
-            this.pokemonTasks = ServerQuestFile.INSTANCE.collect(CobblemonTask.class);
+        if (this.pokemonTasks == null) {
+            this.pokemonTasks = new HashSet<>(ServerQuestFile.INSTANCE.collect(CobblemonTask.class));
         }
-        if(this.pokemonTasks.isEmpty()) return null;
+        if (this.pokemonTasks.isEmpty()) return null;
         Team team = TeamManagerImpl.INSTANCE.getTeamForPlayer(player).orElse(null);
         if (team == null) return null;
         return ServerQuestFile.INSTANCE.getOrCreateTeamData(team);
