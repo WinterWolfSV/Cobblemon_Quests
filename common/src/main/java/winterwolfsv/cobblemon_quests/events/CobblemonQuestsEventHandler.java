@@ -54,21 +54,32 @@ public class CobblemonQuestsEventHandler {
         CobblemonEvents.FOSSIL_REVIVED.subscribe(Priority.LOWEST, this::fossilRevived);
         CobblemonEvents.BOBBER_SPAWN_POKEMON_POST.subscribe(Priority.LOWEST, this::pokemonBobberSpawn);
         CobblemonEvents.POKEMON_SCANNED.subscribe(Priority.LOWEST, this::pokemonScan);
+        CobblemonEvents.POKEDEX_DATA_CHANGED_POST.subscribe(Priority.LOWEST, this::pokedexChanged);
         PlayerEvent.PLAYER_JOIN.register((this::playerJoin));
         return this;
     }
 
-    private void playerJoin(ServerPlayer player) {
+
+    private void triggerPokedexUpdate(UUID playerUUID) {
         try {
-            TeamData teamData = getTeamData(player);
+            TeamData teamData = getTeamData(playerUUID);
             if (teamData == null) return;
-            PokedexManager pokedexManager = Cobblemon.playerDataManager.getPokedexData(player);
+            PokedexManager pokedexManager = Cobblemon.playerDataManager.getPokedexData(playerUUID);
             for (CobblemonTask task : pokemonTasks) {
                 task.increaseHaveRegistered(teamData, pokedexManager);
             }
         } catch (Exception e) {
             CobblemonQuests.LOGGER.warning("Error adding caught pokemon to the dex " + Arrays.toString(e.getStackTrace()));
         }
+    }
+
+    private void playerJoin(ServerPlayer player) {
+        triggerPokedexUpdate(player.getUUID());
+    }
+
+    private Unit pokedexChanged(PokedexDataChangedEvent.Post post) {
+        triggerPokedexUpdate(post.getPlayerUUID());
+        return Unit.INSTANCE;
     }
 
     private Unit pokemonScan(PokemonScannedEvent pokemonScannedEvent) {
@@ -292,6 +303,16 @@ public class CobblemonQuestsEventHandler {
         }
         if (this.pokemonTasks.isEmpty()) return null;
         Team team = TeamManagerImpl.INSTANCE.getTeamForPlayer(player).orElse(null);
+        if (team == null) return null;
+        return ServerQuestFile.INSTANCE.getOrCreateTeamData(team);
+    }
+
+    private TeamData getTeamData(UUID uuid) {
+        if (this.pokemonTasks == null) {
+            this.pokemonTasks = new HashSet<>(ServerQuestFile.INSTANCE.collect(CobblemonTask.class));
+        }
+        if (this.pokemonTasks.isEmpty()) return null;
+        Team team = TeamManagerImpl.INSTANCE.getTeamByID(uuid).orElse(null);
         if (team == null) return null;
         return ServerQuestFile.INSTANCE.getOrCreateTeamData(team);
     }
