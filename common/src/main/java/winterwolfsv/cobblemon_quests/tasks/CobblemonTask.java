@@ -398,7 +398,7 @@ public class CobblemonTask extends Task {
             Set<String> aspects = dexRecords.get(record).getAspects();
             boolean flag = false;
             if (shiny) {
-                if (!aspects.contains("shiny")) return;
+                if (!aspects.contains("shiny")) continue;
             }
             if (!genders.isEmpty()) {
                 for (String gender : genders) {
@@ -407,7 +407,7 @@ public class CobblemonTask extends Task {
                         break;
                     }
                 }
-                if (!flag) return;
+                if (!flag) continue;
                 flag = false;
             }
             if (!forms.isEmpty()) {
@@ -417,16 +417,16 @@ public class CobblemonTask extends Task {
                         break;
                     }
                 }
-                if (!flag) return;
+                if (!flag) continue;
                 flag = false;
             }
 
             Species species = PokemonSpecies.INSTANCE.getByIdentifier(record);
-            if (species == null) return;
+            if (species == null) continue;
 
             if (!regions.isEmpty()) {
                 if (!regions.contains(species.getLabels().toArray()[0].toString())) {
-                    return;
+                    continue;
                 }
             }
 
@@ -437,7 +437,7 @@ public class CobblemonTask extends Task {
                         break;
                     }
                 }
-                if (!flag) return;
+                if (!flag) continue;
             }
             progress += 1;
         }
