@@ -20,17 +20,11 @@ configurations {
 loom {
     enableTransitiveAccessWideners.set(true)
     silentMojangMappingsLicense()
-
-    @Suppress("UnstableApiUsage")
-    mixin {
-        defaultRefmapName.set("cobblemon_quests-${project.name}.refmap.json")
-    }
 }
 
 dependencies {
     minecraft("com.mojang:minecraft:${property("minecraft_version")}")
 
-//    mappings("net.fabricmc:yarn:${property("yarn_mappings")}:v2")
     mappings(loom.officialMojangMappings())
 
     modApi("dev.architectury:architectury-fabric:${property("architectury_version")}")

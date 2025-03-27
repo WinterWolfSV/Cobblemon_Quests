@@ -8,7 +8,6 @@
   "contact": {"repo": "${repository}"},
   "license": "${license}",
   "icon": "${mod_icon}",
-  "mixins": ["cobblemon_quests-common.mixins.json"],
   "environment": "${environment}",
   "entrypoints": {
     "main": ["winterwolfsv.cobblemon_quests.fabric.Cobblemon_QuestsFabric"]

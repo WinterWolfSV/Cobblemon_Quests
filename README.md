@@ -1,11 +1,11 @@
 # Cobblemon Quests
 
-The Cobblemon Quests mod allows you to create quests in FTB Quests where the tasks can be to catch, defeat or kill x
-amount of pokemon.
+The Cobblemon Quests mod allows you to create quests in FTB Quests where the tasks can be to catch, defeat, kill, level
+up, evolve and plenty more with Pokémon.
 
 ## Downloads
 
-The mod can easily be downloaded on either Modrinth or Curseforge \
+The mod can be downloaded on either Modrinth or Curseforge \
 Modrinth: https://modrinth.com/mod/cobblemon-quests \
 Curseforge: https://www.curseforge.com/minecraft/mc-mods/cobblemon-quests
 
@@ -14,17 +14,15 @@ Curseforge: https://www.curseforge.com/minecraft/mc-mods/cobblemon-quests
 Q: Do I need to install this on both server and client?\
 A: Yes.
 
-Q: My players are getting kicked from the server with weird error messages when they try to join.\
-A: Ask them if they have this mod installed. If not, they won't be able to join the server.
+Q: No quests are showing up in the quest book. What do I do?\
+A: This mod does not add any quests by itself. It allows quest creators to create cobblemon related quests.
 
 ## Usage
 
-For quest creators:\
-Simply follow the steps you would normally take to create a quest, but select the cobblemon category. Example images can
-be found in the [gallery](https://modrinth.com/mod/cobblemon-quests/gallery).
-
 For players:\
-Just play the game as you normally would and look at the quests you have. It's all pretty self-explanatory.
+Just play the game as you normally would and look at the quests you have. It should be fairly self-explanatory.
+
+[For quest creators](quest-creation.md)
 
 ## Source Code
 
