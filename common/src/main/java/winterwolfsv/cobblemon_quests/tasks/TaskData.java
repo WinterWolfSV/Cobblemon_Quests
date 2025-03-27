@@ -39,11 +39,12 @@ public class TaskData {
             "magikarp-jump-purple-patches",
             "magikarp-jump-skelly",
             "magikarp-jump-violet-raindrops",
-            "magikarp-jump-violet-saucy"
+            "magikarp-jump-violet-saucy",
+            ""
     );
-    public static final List<String> actionList = Arrays.asList("catch", "defeat", "defeat_player", "defeat_npc", "evolve", "evolve_into", "kill", "level_up", "level_up_to", "release", "trade_away", "trade_for", "obtain", "select_starter", "revive_fossil", "scan", "reel", "register", "have_registered");
+    public static final List<String> actionList = Arrays.asList("catch", "defeat", "defeat_player", "defeat_npc", "evolve", "evolve_into", "kill", "level_up", "level_up_to", "release", "trade_away", "trade_for", "obtain", "select_starter", "revive_fossil", "scan", "reel", "have_registered", "");
     public static final List<String> genderList = Arrays.asList("male", "female", "genderless");
-    public static final List<String> pokemonTypeList = Arrays.asList("normal", "fire", "water", "grass", "electric", "ice", "fighting", "poison", "ground", "flying", "psychic", "bug", "rock", "ghost", "dragon", "dark", "steel", "fairy");
+    public static final List<String> pokemonTypeList = Arrays.asList("normal", "fire", "water", "grass", "electric", "ice", "fighting", "poison", "ground", "flying", "psychic", "bug", "rock", "ghost", "dragon", "dark", "steel", "fairy", "");
     public static final List<String> regionList = Arrays.asList("gen1", "gen2", "gen3", "gen4", "gen5", "gen6", "gen7", "gen8", "gen9");
 
 

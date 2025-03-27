@@ -311,6 +311,7 @@ public class CobblemonQuestsEventHandler {
         if (this.pokemonTasks == null) {
             this.pokemonTasks = new HashSet<>(ServerQuestFile.INSTANCE.collect(CobblemonTask.class));
         }
+        if(uuid == null) return null;
         if (this.pokemonTasks.isEmpty()) return null;
         Team team = TeamManagerImpl.INSTANCE.getTeamByID(uuid).orElse(null);
         if (team == null) return null;

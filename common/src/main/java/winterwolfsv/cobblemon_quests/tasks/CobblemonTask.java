@@ -183,13 +183,17 @@ public class CobblemonTask extends Task {
         assert Minecraft.getInstance().level != null;
         RegistryAccess registryManager = Minecraft.getInstance().level.registryAccess();
         addConfigList(config, "actions", actions, actionList, null, null);
-        Function<String, String> pokemonNameProcessor = (name) -> name.split(":")[0] + ".species." + name.split(":")[1] + ".name";
-        List<String> pokemonList = PokemonSpecies.INSTANCE.getSpecies().stream().map(species -> species.resourceIdentifier.toString()).sorted().toList();
+        Function<String, String> pokemonNameProcessor = (name) -> name.replace(":", ".species.") + ".name";
+        List<String> pokemonList = PokemonSpecies.INSTANCE.getSpecies().stream().map(species -> species.resourceIdentifier.toString())
+                .sorted().collect(Collectors.toCollection(() -> new ArrayList<>(PokemonSpecies.INSTANCE.getSpecies().size() + 1)));
+        pokemonList.add("cobblemon_quests"); // Done to bypass an issue where the last pokemon cannot be selected
         addConfigList(config, "pokemons", pokemons, pokemonList, this::getPokemonIcon, pokemonNameProcessor);
         config.addLong("amount", amount, v -> amount = v, 1L, 1L, Long.MAX_VALUE).setNameKey(MOD_ID + ".task.amount");
         config.addBool("shiny", shiny, v -> shiny = v, false).setNameKey(MOD_ID + ".task.shiny");
         Function<String, String> pokeBallNameProcessor = (name) -> "item." + name.replace(":", ".");
-        List<String> pokeBallList = PokeBalls.INSTANCE.all().stream().map(pokeBall -> pokeBall.getName().toString()).sorted().toList();
+        List<String> pokeBallList = PokeBalls.INSTANCE.all().stream().map(pokeBall -> pokeBall.getName().toString())
+                .sorted().collect(Collectors.toCollection(() -> new ArrayList<>(PokeBalls.INSTANCE.all().size() + 1)));
+        pokeBallList.add("cobblemon_quests");
         addConfigList(config, "pokeballs", pokeBallsUsed, pokeBallList, this::getIconFromIdentifier, pokeBallNameProcessor);
         addConfigList(config, "forms", forms, formList, null, null);
         addConfigList(config, "genders", genders, genderList, null, null);
