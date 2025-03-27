@@ -1,9 +1,5 @@
 package winterwolfsv.cobblemon_quests;
 
-import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
-import net.minecraft.commands.synchronization.SingletonArgumentInfo;
-import net.minecraft.resources.ResourceLocation;
-import winterwolfsv.cobblemon_quests.commands.arguments.types.ActionListArgumentType;
 import winterwolfsv.cobblemon_quests.config.CobblemonQuestsConfig;
 import winterwolfsv.cobblemon_quests.events.CobblemonQuestsEventHandler;
 import winterwolfsv.cobblemon_quests.logger.CobblemonQuestsLogger;
@@ -24,10 +20,5 @@ public class CobblemonQuests {
         }
         eventHandler = new CobblemonQuestsEventHandler().init();
         PokemonTaskTypes.init();
-
-        ArgumentTypeRegistry.registerArgumentType(
-                ResourceLocation.fromNamespaceAndPath(MOD_ID, "argument_list"),
-                ActionListArgumentType.class,
-                SingletonArgumentInfo.contextFree(ActionListArgumentType::actionList));
     }
 }
