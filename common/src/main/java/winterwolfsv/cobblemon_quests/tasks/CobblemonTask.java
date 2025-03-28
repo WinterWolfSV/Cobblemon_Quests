@@ -9,7 +9,9 @@ import com.cobblemon.mod.common.api.types.ElementalType;
 import com.cobblemon.mod.common.item.components.PokemonItemComponent;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import com.cobblemon.mod.common.pokemon.Species;
-import dev.ftb.mods.ftblibrary.config.*;
+import dev.ftb.mods.ftblibrary.config.ConfigGroup;
+import dev.ftb.mods.ftblibrary.config.EnumConfig;
+import dev.ftb.mods.ftblibrary.config.NameMap;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftbquests.quest.Quest;
@@ -47,6 +49,8 @@ public class CobblemonTask extends Task {
     public boolean shiny = false;
     public long timeMin = 0;
     public long timeMax = 24000;
+    public int minLevel = 0;
+    public int maxLevel = 0;
     public ArrayList<String> actions = new ArrayList<>();
     public ArrayList<String> biomes = new ArrayList<>();
     public ArrayList<String> dimensions = new ArrayList<>();
@@ -87,6 +91,8 @@ public class CobblemonTask extends Task {
         nbt.putString("poke_ball_used", writeList(pokeBallsUsed));
         nbt.putString("pokemon_type", writeList(pokemonTypes));
         nbt.putString("region", writeList(regions));
+        nbt.putInt("min_level", minLevel);
+        nbt.putInt("max_level", maxLevel);
     }
 
     @Override
@@ -105,6 +111,8 @@ public class CobblemonTask extends Task {
         pokeBallsUsed = readList(nbt.getString("poke_ball_used"));
         pokemonTypes = readList(nbt.getString("pokemon_type"));
         regions = readList(nbt.getString("region"));
+        minLevel = nbt.getInt("min_level");
+        maxLevel = nbt.getInt("max_level");
 
         if (!forms.isEmpty()) {
             Map<String, String> formReplacements = Map.of(
@@ -146,6 +154,8 @@ public class CobblemonTask extends Task {
         buffer.writeUtf(writeList(pokeBallsUsed), Short.MAX_VALUE);
         buffer.writeUtf(writeList(pokemonTypes), Short.MAX_VALUE);
         buffer.writeUtf(writeList(regions), Short.MAX_VALUE);
+        buffer.writeInt(minLevel);
+        buffer.writeInt(maxLevel);
     }
 
     @Override
@@ -164,6 +174,8 @@ public class CobblemonTask extends Task {
         pokeBallsUsed = readList(buffer.readUtf(Short.MAX_VALUE));
         pokemonTypes = readList(buffer.readUtf(Short.MAX_VALUE));
         regions = readList(buffer.readUtf(Short.MAX_VALUE));
+        minLevel = buffer.readInt();
+        maxLevel = buffer.readInt();
     }
 
     public String writeList(ArrayList<String> list) {
@@ -208,6 +220,8 @@ public class CobblemonTask extends Task {
         addConfigList(config, "dimensions", dimensions, dimensionList, null, biomeAndDimensionNameProcessor);
         config.addLong("time_min", timeMin, v -> timeMin = v, 0L, 0L, 24000L).setNameKey(MOD_ID + ".task.time_min");
         config.addLong("time_max", timeMax, v -> timeMax = v, 24000L, 0L, 24000L).setNameKey(MOD_ID + ".task.time_max");
+        config.addInt("min_level", minLevel, v -> minLevel = v, 0, 0, Integer.MAX_VALUE).setNameKey(MOD_ID + ".task.min_level");
+        config.addInt("max_level", maxLevel, v -> maxLevel = v, 0, 0, Integer.MAX_VALUE).setNameKey(MOD_ID + ".task.max_level");
     }
 
     private void addConfigList(ConfigGroup config, String listName, List<String> listData, List<String> optionsList, Function<ResourceLocation, Icon> iconProcessor, Function<String, String> nameProcessor) {
@@ -263,7 +277,14 @@ public class CobblemonTask extends Task {
             titleBuilder.append("in a ").append(biome.split(":")[1].replace("_", " ")).append(" biome ");
         }
         if (!(timeMin == 0 && timeMax == 24000)) {
-            titleBuilder.append("between the time ").append(timeMin).append(" and ").append(timeMax);
+            titleBuilder.append("between the time ").append(timeMin).append(" and ").append(timeMax).append(" ");
+        }
+        if (maxLevel != 0) {
+            if (minLevel == maxLevel) {
+                titleBuilder.append("at level ").append(minLevel).append(" ");
+            } else {
+                titleBuilder.append("between level ").append(minLevel).append(" and ").append(maxLevel).append(" ");
+            }
         }
 
         return Component.literal(titleBuilder.toString().trim());
@@ -329,6 +350,13 @@ public class CobblemonTask extends Task {
                     return;
                 }
             }
+
+            if (maxLevel != 0) {
+                if (pokemon.getLevel() > maxLevel || pokemon.getLevel() < minLevel) {
+                    return;
+                }
+            }
+
             if (!pokeBallsUsed.isEmpty()) {
                 if (!pokeBallsUsed.contains(pokemon.getCaughtBall().getName().toString())) {
                     return;
