@@ -7,6 +7,7 @@ import com.cobblemon.mod.common.api.battles.model.actor.BattleActor;
 import com.cobblemon.mod.common.api.events.CobblemonEvents;
 import com.cobblemon.mod.common.api.events.battles.BattleVictoryEvent;
 import com.cobblemon.mod.common.api.events.fishing.BobberSpawnPokemonEvent;
+import com.cobblemon.mod.common.api.events.pokeball.ThrownPokeballHitEvent;
 import com.cobblemon.mod.common.api.events.pokedex.scanning.PokemonScannedEvent;
 import com.cobblemon.mod.common.api.events.pokemon.*;
 import com.cobblemon.mod.common.api.events.pokemon.evolution.EvolutionAcceptedEvent;
@@ -27,14 +28,16 @@ import dev.ftb.mods.ftbquests.quest.TeamData;
 import dev.ftb.mods.ftbteams.api.Team;
 import dev.ftb.mods.ftbteams.data.TeamManagerImpl;
 import kotlin.Unit;
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import winterwolfsv.cobblemon_quests.CobblemonQuests;
 import winterwolfsv.cobblemon_quests.tasks.CobblemonTask;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.UUID;
 
 public class CobblemonQuestsEventHandler {
     private HashSet<CobblemonTask> pokemonTasks = null;
@@ -55,10 +58,10 @@ public class CobblemonQuestsEventHandler {
         CobblemonEvents.BOBBER_SPAWN_POKEMON_POST.subscribe(Priority.LOWEST, this::pokemonBobberSpawn);
         CobblemonEvents.POKEMON_SCANNED.subscribe(Priority.LOWEST, this::pokemonScan);
         CobblemonEvents.POKEDEX_DATA_CHANGED_POST.subscribe(Priority.LOWEST, this::pokedexChanged);
+        CobblemonEvents.THROWN_POKEBALL_HIT.subscribe(Priority.LOWEST, this::pokeballHit);
         PlayerEvent.PLAYER_JOIN.register((this::playerJoin));
         return this;
     }
-
 
     private void triggerPokedexUpdate(UUID playerUUID) {
         try {
@@ -198,6 +201,20 @@ public class CobblemonQuestsEventHandler {
         return pokemonCatch(pokemonCapturedEvent.getPokemon(), pokemonCapturedEvent.getPlayer());
     }
 
+    private Unit pokeballHit(ThrownPokeballHitEvent thrownPokeballHitEvent) {
+        try {
+            Entity ballOwner = thrownPokeballHitEvent.getPokeBall().getOwner();
+            if (ballOwner instanceof ServerPlayer player) {
+                Pokemon pokemon = thrownPokeballHitEvent.getPokemon().getPokemon();
+                pokemon.setCaughtBall(thrownPokeballHitEvent.getPokeBall().getPokeBall());
+                processTasksForTeam(pokemon, "throw_ball", 1, player);
+            }
+        } catch (Exception e) {
+            CobblemonQuests.LOGGER.warning("Error processing pokéball hit event " + Arrays.toString(e.getStackTrace()));
+        }
+        return Unit.INSTANCE;
+    }
+
     private EventResult entityKill(Entity livingEntity, DamageSource damageSource) {
         try {
             if (damageSource.getEntity() instanceof ServerPlayer player && !PlayerHooks.isFake(player)) {
@@ -311,7 +328,7 @@ public class CobblemonQuestsEventHandler {
         if (this.pokemonTasks == null) {
             this.pokemonTasks = new HashSet<>(ServerQuestFile.INSTANCE.collect(CobblemonTask.class));
         }
-        if(uuid == null) return null;
+        if (uuid == null) return null;
         if (this.pokemonTasks.isEmpty()) return null;
         Team team = TeamManagerImpl.INSTANCE.getTeamByID(uuid).orElse(null);
         if (team == null) return null;
