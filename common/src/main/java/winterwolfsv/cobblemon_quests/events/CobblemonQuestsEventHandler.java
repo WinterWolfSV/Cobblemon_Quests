@@ -58,14 +58,14 @@ public class CobblemonQuestsEventHandler {
         CobblemonEvents.FOSSIL_REVIVED.subscribe(Priority.LOWEST, this::fossilRevived);
         CobblemonEvents.BOBBER_SPAWN_POKEMON_POST.subscribe(Priority.LOWEST, this::pokemonBobberSpawn);
         CobblemonEvents.POKEMON_SCANNED.subscribe(Priority.LOWEST, this::pokemonScan);
-        CobblemonEvents.POKEDEX_DATA_CHANGED_POST.subscribe(Priority.LOWEST, this::pokedexChanged);
-        CobblemonEvents.POKEDEX_DATA_CHANGED_PRE.subscribe(Priority.LOWEST, this::pokedexChanged);
+        CobblemonEvents.POKEDEX_DATA_CHANGED_POST.subscribe(Priority.LOWEST, this::pokeDexChanged);
+        CobblemonEvents.POKEDEX_DATA_CHANGED_PRE.subscribe(Priority.LOWEST, this::pokeDexChanged);
         CobblemonEvents.THROWN_POKEBALL_HIT.subscribe(Priority.LOWEST, this::pokeballHit);
         PlayerEvent.PLAYER_JOIN.register((this::playerJoin));
         return this;
     }
 
-    private void triggerPokedexUpdate(UUID playerUUID) {
+    private void triggerPokeDexUpdate(UUID playerUUID) {
         try {
             TeamData teamData = getTeamData(playerUUID);
             if (teamData == null) return;
@@ -79,10 +79,10 @@ public class CobblemonQuestsEventHandler {
     }
 
     private void playerJoin(ServerPlayer player) {
-        triggerPokedexUpdate(player.getUUID());
+        triggerPokeDexUpdate(player.getUUID());
     }
 
-    private Unit pokedexChanged(PokedexDataChangedEvent.Pre pre) {
+    private Unit pokeDexChanged(PokedexDataChangedEvent.Pre pre) {
         // 0: encountered
         // 1: caught after encounter
         // 2: caught without encounter
@@ -118,8 +118,8 @@ public class CobblemonQuestsEventHandler {
         return Unit.INSTANCE;
     }
 
-    private Unit pokedexChanged(PokedexDataChangedEvent.Post post) {
-        triggerPokedexUpdate(post.getPlayerUUID());
+    private Unit pokeDexChanged(PokedexDataChangedEvent.Post post) {
+        triggerPokeDexUpdate(post.getPlayerUUID());
         return Unit.INSTANCE;
     }
 
