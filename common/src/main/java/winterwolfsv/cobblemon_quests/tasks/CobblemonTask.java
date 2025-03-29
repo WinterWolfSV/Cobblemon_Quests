@@ -478,7 +478,8 @@ public class CobblemonTask extends Task {
 
     // data is a string that should match an entry in the (comma separated) form field.
     public void increaseWoPokemon(TeamData teamData, String data, String executedAction, long progress) {
-        if (actions.contains(executedAction) && forms.contains(data) || forms.isEmpty()) {
+        if (actions.contains(executedAction) && (forms.contains(data) || forms.isEmpty())) {
+            System.out.println("Contains actions: " + actions.contains(executedAction) + " contains forms: " + forms.contains(data) + " or forms is empty: " + forms.isEmpty());
             teamData.addProgress(this, progress);
         }
     }
