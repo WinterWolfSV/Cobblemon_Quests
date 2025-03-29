@@ -14,6 +14,7 @@ import com.cobblemon.mod.common.api.events.pokemon.evolution.EvolutionAcceptedEv
 import com.cobblemon.mod.common.api.events.pokemon.evolution.EvolutionCompleteEvent;
 import com.cobblemon.mod.common.api.events.starter.StarterChosenEvent;
 import com.cobblemon.mod.common.api.events.storage.ReleasePokemonEvent;
+import com.cobblemon.mod.common.api.pokedex.PokedexEntryProgress;
 import com.cobblemon.mod.common.api.pokedex.PokedexManager;
 import com.cobblemon.mod.common.entity.pokemon.PokemonEntity;
 import com.cobblemon.mod.common.pokemon.Pokemon;
@@ -31,13 +32,13 @@ import kotlin.Unit;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import winterwolfsv.cobblemon_quests.CobblemonQuests;
 import winterwolfsv.cobblemon_quests.tasks.CobblemonTask;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class CobblemonQuestsEventHandler {
     private HashSet<CobblemonTask> pokemonTasks = null;
@@ -58,6 +59,7 @@ public class CobblemonQuestsEventHandler {
         CobblemonEvents.BOBBER_SPAWN_POKEMON_POST.subscribe(Priority.LOWEST, this::pokemonBobberSpawn);
         CobblemonEvents.POKEMON_SCANNED.subscribe(Priority.LOWEST, this::pokemonScan);
         CobblemonEvents.POKEDEX_DATA_CHANGED_POST.subscribe(Priority.LOWEST, this::pokedexChanged);
+        CobblemonEvents.POKEDEX_DATA_CHANGED_PRE.subscribe(Priority.LOWEST, this::pokedexChanged);
         CobblemonEvents.THROWN_POKEBALL_HIT.subscribe(Priority.LOWEST, this::pokeballHit);
         PlayerEvent.PLAYER_JOIN.register((this::playerJoin));
         return this;
@@ -78,6 +80,42 @@ public class CobblemonQuestsEventHandler {
 
     private void playerJoin(ServerPlayer player) {
         triggerPokedexUpdate(player.getUUID());
+    }
+
+    private Unit pokedexChanged(PokedexDataChangedEvent.Pre pre) {
+        // 0: encountered
+        // 1: caught after encounter
+        // 2: caught without encounter
+        try {
+            Pokemon pokemon = pre.getDataSource().getPokemon();
+            PokedexEntryProgress before = pre.getPokedexManager().getKnowledgeForSpecies(pokemon.getSpecies().getResourceIdentifier());
+            PokedexEntryProgress after = pre.getKnowledge();
+            int value = after.equals(PokedexEntryProgress.CAUGHT)
+                    ? (before.equals(PokedexEntryProgress.ENCOUNTERED) ? 1 : 2)
+                    : after.equals(PokedexEntryProgress.ENCOUNTERED) ? 0 : -1;
+            if (value == -1)
+                throw new Exception("Invalid pokedex change.", new Throwable("Before: " + before + " After: " + after));
+            LivingEntity owner = pre.getDataSource().getPokemon().getOwnerEntity();
+            PokemonEntity pokemonEntity = pokemon.getEntity();
+            Level world = Optional.ofNullable(owner)
+                    .map(LivingEntity::level)
+                    .orElseGet(() -> Optional.ofNullable(pokemonEntity)
+                            .map(PokemonEntity::level)
+                            .orElse(null));
+
+            if (world == null) {
+                Throwable cause = new Throwable("Owner uuid " + pre.getPlayerUUID() + "Owner: " + owner + " PokemonEntity: " + pokemonEntity);
+                throw new NoSuchElementException("World is null while processing pokedex.", cause);
+            }
+
+            Player player = world.getPlayerByUUID(pre.getPlayerUUID());
+            if (player instanceof ServerPlayer serverPlayer) {
+                processTasksForTeam(pokemon, "register", value, serverPlayer);
+            }
+        } catch (Exception e) {
+            CobblemonQuests.LOGGER.warning("Error processing pokedex changed event " + e.getCause() + " " + Arrays.toString(e.getStackTrace()));
+        }
+        return Unit.INSTANCE;
     }
 
     private Unit pokedexChanged(PokedexDataChangedEvent.Post post) {
