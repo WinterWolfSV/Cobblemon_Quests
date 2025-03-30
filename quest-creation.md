@@ -28,22 +28,22 @@
 
 All the conditions below stack on top of each other, meaning that
 
-| Condition                | Parameter name      | Type         | Description                                                                                                                                                     |
-| ------------------------ | ------------------- | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Actions                  | action              | List<String> | The action performed by the player for the quest to trigger.                                                                                                    |
-| Amount                   | amount              | long         | The amount of pokemon to defeat/catch etc.                                                                                                                      |
-| Biomes                   | biome               | List<String> | The biome the player is in when triggering the quest.                                                                                                           |
-| Pokédex progress         | dex_progress        | String       | Specifies if the Pokédex has a Pokémon registered as `seen` or `caught`, used with the actions `register` and `have registered`.                                |
-| Dimensions               | dimension           | List<String> | The dimension the player is in when triggering the quest.                                                                                                       |
-| Forms                    | form                | List<String> | Matches the aspects of the pokemon. Used primarily for checking pokemon forms but can also be used to check for aspects. See [Custom aspects](#custom-aspects). |
-| Genders                  | gender              | List<String> | The gender of the pokemon                                                                                                                                       |
-| Min/max time of day      | time_min/time_max   | long         | The time of which the action is executed. `time_min <= time < time_max`.                                                                                        |
-| Min/max level of pokemon | min_level/max_level | int          | The Pokémon's min/max level (inclusive). If both are set to the same nonzero value, the Pokémon is required to have that level.                                 |
-| Poké Balls used          | poke_ball_used      | List<String> | The poke ball used. Also applicable on tasks such as `trade` and `evolve` where the pokemon has a ball.                                                         |
-| Pokemon                  | pokemon             | List<String> | The pokemon that count for the task.                                                                                                                            |
-| Pokémon types            | pokemon_type        | List<String> | The type of the pokemon. (fire, water, earth, etc.)                                                                                                             |
-| Regions                  | region              | List<String> | The region/generation the pokemon is from. For custom regions, see [Custom regions](#custom-regions-pokemon-and-dimensions).                                    |
-| Shiny                    | shiny               | boolean      | If the pokemon is shiny.                                                                                                                                        |
+| Condition                | Parameter name      | Type           | Description                                                                                                                                                     |
+| ------------------------ | ------------------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Actions                  | action              | List\<String\> | The action performed by the player for the quest to trigger.                                                                                                    |
+| Amount                   | amount              | long           | The amount of pokemon to defeat/catch etc.                                                                                                                      |
+| Biomes                   | biome               | List\<String\> | The biome the player is in when triggering the quest.                                                                                                           |
+| Pokédex progress         | dex_progress        | String         | Specifies if the Pokédex has a Pokémon registered as `seen` or `caught`, used with the actions `register` and `have registered`.                                |
+| Dimensions               | dimension           | List\<String\> | The dimension the player is in when triggering the quest.                                                                                                       |
+| Forms                    | form                | List\<String\> | Matches the aspects of the pokemon. Used primarily for checking pokemon forms but can also be used to check for aspects. See [Custom aspects](#custom-aspects). |
+| Genders                  | gender              | List\<String\> | The gender of the pokemon                                                                                                                                       |
+| Min/max time of day      | time_min/time_max   | long           | The time of which the action is executed. `time_min <= time < time_max`.                                                                                        |
+| Min/max level of pokemon | min_level/max_level | int            | The Pokémon's min/max level (inclusive). If both are set to the same nonzero value, the Pokémon is required to have that level.                                 |
+| Poké Balls used          | poke_ball_used      | List\<String\> | The poke ball used. Also applicable on tasks such as `trade` and `evolve` where the pokemon has a ball.                                                         |
+| Pokemon                  | pokemon             | List\<String\> | The pokemon that count for the task.                                                                                                                            |
+| Pokémon types            | pokemon_type        | List\<String\> | The type of the pokemon. (fire, water, earth, etc.)                                                                                                             |
+| Regions                  | region              | List\<String\> | The region/generation the pokemon is from. For custom regions, see [Custom regions](#custom-regions-pokemon-and-dimensions).                                    |
+| Shiny                    | shiny               | boolean        | If the pokemon is shiny.                                                                                                                                        |
 
 ## Custom aspects
 
