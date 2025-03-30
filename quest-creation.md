@@ -2,44 +2,48 @@
 
 ## Actions
 
-| Actions        | Parameter name | Description                                                                                                      |
-| -------------- | -------------- | ---------------------------------------------------------------------------------------------------------------- |
-| Catch          | catch          | Catch a Pokémon.                                                                                                 |
-| Defeat         | defeat         | Defeat a Pokémon.                                                                                                |
-| Defeat Player  | defeat_player  | [Defeat a player](#defeat-player-and-npc)                                                                        |
-| Defeat NPC     | defeat_npc     | [Defeat an NPC](#defeat-player-and-npc)                                                                          |
-| Evolve         | evolve         | Triggers on a Pokémon being evolved. Ex. Bulbasaur -> Ivysaur counts as Bulbasaur.                               |
-| Evolve into    | evolve_into    | Triggers on a Pokémon being evolved into. The example above would count as Ivysaur. Also triggers `catch` event. |
-| Kill           | kill           | Kill a Pokémon.                                                                                                  |
-| Level up       | level_up       | Triggers on the delta level of a Pokémon. Ex. lvl 10 -> 13 would increase the task with 3.                       |
-| Level up to    | level_up_to    | Triggers on the resulting level. Ex. lvl 10 -> 13 would set the task completion to 13 out of `amount`.           |
-| Release        | release        | Go into the pc and release Pokémon into the wild.                                                                |
-| Trade away     | trade_away     | Triggers on a Pokémon leaving the players possession.                                                            |
-| Trade for      | trade_for      | Triggers on a Pokémon entering the players possession.                                                           |
-| Obtain         | obtain         | Any of `catch, trade_for, revive_fossil`.                                                                        |
-| Select starter | select_starter | Select starter. Also triggers `catch`                                                                            |
-| Revive fossil  | revive_fossil  | Revive fossil in the resurrection machine.                                                                       |
-| Scan           | scan           | Use a Pokédex to scan a Pokémon.                                                                                 |
-| Reel           | reel           | Use a Poké Rod to reel in a Pokémon.                                                                             |
+| Actions         | Parameter name  | Description                                                                                                                                                        |
+| --------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Catch           | catch           | Catch a Pokémon.                                                                                                                                                   |
+| Defeat          | defeat          | Defeat a Pokémon.                                                                                                                                                  |
+| Defeat Player   | defeat_player   | [Defeat a player](#defeat-player-and-npc)                                                                                                                          |
+| Defeat NPC      | defeat_npc      | [Defeat an NPC](#defeat-player-and-npc)                                                                                                                            |
+| Evolve          | evolve          | Triggers on a Pokémon being evolved. Ex. Bulbasaur -> Ivysaur counts as Bulbasaur.                                                                                 |
+| Evolve into     | evolve_into     | Triggers on a Pokémon being evolved into. The example above would count as Ivysaur. Also triggers `catch` event.                                                   |
+| Kill            | kill            | Kill a Pokémon.                                                                                                                                                    |
+| Level up        | level_up        | Triggers on the delta level of a Pokémon. Ex. lvl 10 -> 13 would increase the task with 3.                                                                         |
+| Level up to     | level_up_to     | Triggers on the resulting level. Ex. lvl 10 -> 13 would set the task completion to 13 out of `amount`.                                                             |
+| Release         | release         | Go into the pc and release Pokémon into the wild.                                                                                                                  |
+| Throw Poké Ball | throw_ball      | Throw the selected ball at a Pokémon.                                                                                                                              |
+| Trade away      | trade_away      | Triggers on a Pokémon leaving the players possession.                                                                                                              |
+| Trade for       | trade_for       | Triggers on a Pokémon entering the players possession.                                                                                                             |
+| Obtain          | obtain          | Any of `catch, trade_for, revive_fossil`.                                                                                                                          |
+| Select starter  | select_starter  | Select starter. Also triggers `catch`                                                                                                                              |
+| Revive fossil   | revive_fossil   | Revive fossil in the resurrection machine.                                                                                                                         |
+| Scan            | scan            | Use a Pokédex to scan a Pokémon.                                                                                                                                   |
+| Reel            | reel            | Use a Poké Rod to reel in a Pokémon.                                                                                                                               |
+| Have registered | have_registered | Pokémon registered in the Pokédex. Checked on player login and dex update. Level of registration (seen/caught) can be selected using the `dex_progress` condition. |
 
 ## Conditions
 
 All the conditions below stack on top of each other, meaning that
 
-| Condition           | Parameter name | Description                                                                                                                                                     |
-| ------------------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Actions             |                | The action performed by the player for the quest to trigger.                                                                                                    |
-| Amount              |                | The amount of pokemon to defeat/catch etc.                                                                                                                      |
-| Biomes              |                | The biome the player is in when triggering the quest.                                                                                                           |
-| Dimensions          |                | The dimension the player is in when triggering the quest.                                                                                                       |
-| Forms               |                | Matches the aspects of the pokemon. Used primarily for checking pokemon forms but can also be used to check for aspects. See [Custom aspects](#custom-aspects). |
-| Genders             |                | The gender of the pokemon                                                                                                                                       |
-| Max/min time of day |                | The time of which the action is executed. `time_min <= time < time_max`.                                                                                        |
-| Poké balls used     |                | The poke ball used. Also applicable on tasks such as `trade` and `evolve` where the pokemon has a ball.                                                         |
-| Pokemon             |                | The pokemon that count for the task.                                                                                                                            |
-| Pokémon types       |                | The type of the pokemon. (fire, water, earth, etc.)                                                                                                             |
-| Regions             |                | The region/generation the pokemon is from. For custom regions, see [Custom regions](#custom-regions-pokemon-and-dimensions).                                    |
-| Shiny               |                | If the pokemon is shiny.                                                                                                                                        |
+| Condition                | Parameter name      | Type         | Description                                                                                                                                                     |
+| ------------------------ | ------------------- | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Actions                  | action              | List<String> | The action performed by the player for the quest to trigger.                                                                                                    |
+| Amount                   | amount              | long         | The amount of pokemon to defeat/catch etc.                                                                                                                      |
+| Biomes                   | biome               | List<String> | The biome the player is in when triggering the quest.                                                                                                           |
+| Pokédex progress         | dex_progress        | String       | Specifies if the Pokédex has a Pokémon registered as `seen` or `caught`, used with the actions `register` and `have registered`.                                |
+| Dimensions               | dimension           | List<String> | The dimension the player is in when triggering the quest.                                                                                                       |
+| Forms                    | form                | List<String> | Matches the aspects of the pokemon. Used primarily for checking pokemon forms but can also be used to check for aspects. See [Custom aspects](#custom-aspects). |
+| Genders                  | gender              | List<String> | The gender of the pokemon                                                                                                                                       |
+| Min/max time of day      | time_min/time_max   | long         | The time of which the action is executed. `time_min <= time < time_max`.                                                                                        |
+| Min/max level of pokemon | min_level/max_level | int          | The Pokémon's min/max level (inclusive). If both are set to the same nonzero value, the Pokémon is required to have that level.                                 |
+| Poké Balls used          | poke_ball_used      | List<String> | The poke ball used. Also applicable on tasks such as `trade` and `evolve` where the pokemon has a ball.                                                         |
+| Pokemon                  | pokemon             | List<String> | The pokemon that count for the task.                                                                                                                            |
+| Pokémon types            | pokemon_type        | List<String> | The type of the pokemon. (fire, water, earth, etc.)                                                                                                             |
+| Regions                  | region              | List<String> | The region/generation the pokemon is from. For custom regions, see [Custom regions](#custom-regions-pokemon-and-dimensions).                                    |
+| Shiny                    | shiny               | boolean      | If the pokemon is shiny.                                                                                                                                        |
 
 ## Custom aspects
 
@@ -166,8 +170,6 @@ and replace `<pokemon_name>` and `<namespace>`with the correct values and add th
 ```bash
 /give @s cobblemon:pokemon_model[cobblemon:pokemon_item={species:"cobblemon:zigzagoon",aspects:[galarian]}]
 ```
-
-
 
 ## Commands
 

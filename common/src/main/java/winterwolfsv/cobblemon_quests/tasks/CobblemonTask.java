@@ -2,14 +2,19 @@ package winterwolfsv.cobblemon_quests.tasks;
 
 import com.cobblemon.mod.common.CobblemonItemComponents;
 import com.cobblemon.mod.common.api.pokeball.PokeBalls;
+import com.cobblemon.mod.common.api.pokedex.PokedexEntryProgress;
 import com.cobblemon.mod.common.api.pokedex.PokedexManager;
 import com.cobblemon.mod.common.api.pokedex.SpeciesDexRecord;
+import com.cobblemon.mod.common.api.pokemon.Natures;
 import com.cobblemon.mod.common.api.pokemon.PokemonSpecies;
 import com.cobblemon.mod.common.api.types.ElementalType;
 import com.cobblemon.mod.common.item.components.PokemonItemComponent;
+import com.cobblemon.mod.common.pokemon.Nature;
 import com.cobblemon.mod.common.pokemon.Pokemon;
 import com.cobblemon.mod.common.pokemon.Species;
-import dev.ftb.mods.ftblibrary.config.*;
+import dev.ftb.mods.ftblibrary.config.ConfigGroup;
+import dev.ftb.mods.ftblibrary.config.EnumConfig;
+import dev.ftb.mods.ftblibrary.config.NameMap;
 import dev.ftb.mods.ftblibrary.icon.Icon;
 import dev.ftb.mods.ftblibrary.icon.ItemIcon;
 import dev.ftb.mods.ftbquests.quest.Quest;
@@ -47,6 +52,9 @@ public class CobblemonTask extends Task {
     public boolean shiny = false;
     public long timeMin = 0;
     public long timeMax = 24000;
+    public int minLevel = 0;
+    public int maxLevel = 0;
+    public String dexProgress = "seen";
     public ArrayList<String> actions = new ArrayList<>();
     public ArrayList<String> biomes = new ArrayList<>();
     public ArrayList<String> dimensions = new ArrayList<>();
@@ -56,6 +64,7 @@ public class CobblemonTask extends Task {
     public ArrayList<String> pokemons = new ArrayList<>();
     public ArrayList<String> pokemonTypes = new ArrayList<>();
     public ArrayList<String> regions = new ArrayList<>();
+    public ArrayList<String> natures = new ArrayList<>();
 
     public CobblemonTask(long id, Quest quest) {
         super(id, quest);
@@ -87,6 +96,10 @@ public class CobblemonTask extends Task {
         nbt.putString("poke_ball_used", writeList(pokeBallsUsed));
         nbt.putString("pokemon_type", writeList(pokemonTypes));
         nbt.putString("region", writeList(regions));
+        nbt.putString("natures", writeList(natures));
+        nbt.putInt("min_level", minLevel);
+        nbt.putInt("max_level", maxLevel);
+        nbt.putString("dex_progress", dexProgress);
     }
 
     @Override
@@ -105,6 +118,10 @@ public class CobblemonTask extends Task {
         pokeBallsUsed = readList(nbt.getString("poke_ball_used"));
         pokemonTypes = readList(nbt.getString("pokemon_type"));
         regions = readList(nbt.getString("region"));
+        natures = readList(nbt.getString("natures"));
+        minLevel = nbt.getInt("min_level");
+        maxLevel = nbt.getInt("max_level");
+        dexProgress = nbt.getString("dex_progress");
 
         if (!forms.isEmpty()) {
             Map<String, String> formReplacements = Map.of(
@@ -127,6 +144,9 @@ public class CobblemonTask extends Task {
         if (amount == 0) {
             amount = 1;
         }
+        if (dexProgress.isEmpty()) {
+            dexProgress = "seen";
+        }
         pokemons.remove("minecraft:");
     }
 
@@ -146,6 +166,10 @@ public class CobblemonTask extends Task {
         buffer.writeUtf(writeList(pokeBallsUsed), Short.MAX_VALUE);
         buffer.writeUtf(writeList(pokemonTypes), Short.MAX_VALUE);
         buffer.writeUtf(writeList(regions), Short.MAX_VALUE);
+        buffer.writeUtf(writeList(natures), Short.MAX_VALUE);
+        buffer.writeInt(minLevel);
+        buffer.writeInt(maxLevel);
+        buffer.writeUtf(dexProgress, Short.MAX_VALUE);
     }
 
     @Override
@@ -164,6 +188,10 @@ public class CobblemonTask extends Task {
         pokeBallsUsed = readList(buffer.readUtf(Short.MAX_VALUE));
         pokemonTypes = readList(buffer.readUtf(Short.MAX_VALUE));
         regions = readList(buffer.readUtf(Short.MAX_VALUE));
+        natures = readList(buffer.readUtf(Short.MAX_VALUE));
+        minLevel = buffer.readInt();
+        maxLevel = buffer.readInt();
+        dexProgress = buffer.readUtf(Short.MAX_VALUE);
     }
 
     public String writeList(ArrayList<String> list) {
@@ -208,6 +236,16 @@ public class CobblemonTask extends Task {
         addConfigList(config, "dimensions", dimensions, dimensionList, null, biomeAndDimensionNameProcessor);
         config.addLong("time_min", timeMin, v -> timeMin = v, 0L, 0L, 24000L).setNameKey(MOD_ID + ".task.time_min");
         config.addLong("time_max", timeMax, v -> timeMax = v, 24000L, 0L, 24000L).setNameKey(MOD_ID + ".task.time_max");
+        config.addInt("min_level", minLevel, v -> minLevel = v, 0, 0, Integer.MAX_VALUE).setNameKey(MOD_ID + ".task.min_level");
+        config.addInt("max_level", maxLevel, v -> maxLevel = v, 0, 0, Integer.MAX_VALUE).setNameKey(MOD_ID + ".task.max_level");
+
+        List<String> dexProgressList = List.of("caught", "seen");
+        config.addEnum("dex_progress", dexProgress, v -> dexProgress = v, NameMap.of(dexProgress, dexProgressList)
+                .nameKey(v -> "cobblemon_quests.dex_progress." + v)
+                .create(), dexProgress).setNameKey(MOD_ID + ".task.dex_progress");
+
+        List<String> natureList = Natures.INSTANCE.all().stream().map(Nature::getDisplayName).toList();
+        addConfigList(config, "natures", natures, natureList, null, s -> s);
     }
 
     private void addConfigList(ConfigGroup config, String listName, List<String> listData, List<String> optionsList, Function<ResourceLocation, Icon> iconProcessor, Function<String, String> nameProcessor) {
@@ -222,6 +260,10 @@ public class CobblemonTask extends Task {
         for (String action : actions) {
             titleBuilder.append(Component.translatable("cobblemon_quests.actions." + action).getString()).append(" ");
         }
+        if (actions.contains("have_registered") || actions.contains("register")) {
+            titleBuilder.append("(").append(dexProgress).append(") ");
+        }
+
         titleBuilder.append(amount).append("x ");
         if (shiny) {
             titleBuilder.append(Component.translatable("cobblemon_quests.task.shiny").getString()).append(" ");
@@ -237,6 +279,9 @@ public class CobblemonTask extends Task {
         }
         for (String pokemonType : pokemonTypes) {
             titleBuilder.append(Component.translatable("cobblemon.type." + pokemonType).getString()).append(" ");
+        }
+        for (String nature : natures) {
+            titleBuilder.append(Component.translatable(nature).getString()).append(" ");
         }
         if (pokemons.isEmpty()) {
             titleBuilder.append(Component.translatable("cobblemon_quests.task.pokemons").getString()).append(" ");
@@ -263,7 +308,14 @@ public class CobblemonTask extends Task {
             titleBuilder.append("in a ").append(biome.split(":")[1].replace("_", " ")).append(" biome ");
         }
         if (!(timeMin == 0 && timeMax == 24000)) {
-            titleBuilder.append("between the time ").append(timeMin).append(" and ").append(timeMax);
+            titleBuilder.append("between the time ").append(timeMin).append(" and ").append(timeMax).append(" ");
+        }
+        if (maxLevel != 0) {
+            if (minLevel == maxLevel) {
+                titleBuilder.append("at level ").append(minLevel).append(" ");
+            } else {
+                titleBuilder.append("between level ").append(minLevel).append(" and ").append(maxLevel).append(" ");
+            }
         }
 
         return Component.literal(titleBuilder.toString().trim());
@@ -329,6 +381,13 @@ public class CobblemonTask extends Task {
                     return;
                 }
             }
+
+            if (maxLevel != 0) {
+                if (pokemon.getLevel() > maxLevel || pokemon.getLevel() < minLevel) {
+                    return;
+                }
+            }
+
             if (!pokeBallsUsed.isEmpty()) {
                 if (!pokeBallsUsed.contains(pokemon.getCaughtBall().getName().toString())) {
                     return;
@@ -376,6 +435,12 @@ public class CobblemonTask extends Task {
                 if (!flag) return;
             }
 
+            if (!natures.isEmpty()) {
+                if (!natures.contains(pokemon.getNature().getDisplayName())) {
+                    return;
+                }
+            }
+
             // Check shiny
             if (!pokemon.getShiny() && shiny) return;
             boolean shouldAddProgress = pokemons.stream().anyMatch(p -> p.split(":").length > 1 && p.split(":")[1].equals(pokemon.getSpecies().toString())) || pokemons.isEmpty();
@@ -386,6 +451,13 @@ public class CobblemonTask extends Task {
                         teamData.setProgress(this, progress);
                     }
                     return;
+                }
+                if (executedAction.equals("register")) {
+                    if (dexProgress.equals("seen")) {
+                        progress = (progress == 1) ? 0 : 1;
+                    } else if (dexProgress.equals("caught")) {
+                        progress = progress != 0 ? 0 : 1;
+                    }
                 }
                 teamData.addProgress(this, progress);
             }
@@ -398,12 +470,21 @@ public class CobblemonTask extends Task {
         long progress = 0;
         Map<ResourceLocation, SpeciesDexRecord> dexRecords = pokedexManager.getSpeciesRecords();
         for (ResourceLocation record : dexRecords.keySet()) {
+            SpeciesDexRecord dexRecord = dexRecords.get(record);
             if (!pokemons.isEmpty() && !pokemons.contains(record.toString())) continue;
-            Set<String> aspects = dexRecords.get(record).getAspects();
+            Set<String> aspects = dexRecord.getAspects();
             boolean flag = false;
+
+            if (Objects.equals(dexProgress, "caught")) {
+                if (!dexRecord.getKnowledge().equals(PokedexEntryProgress.CAUGHT)) {
+                    continue;
+                }
+            }
+
             if (shiny) {
                 if (!aspects.contains("shiny")) continue;
             }
+
             if (!genders.isEmpty()) {
                 for (String gender : genders) {
                     if (aspects.contains(gender)) {
@@ -450,7 +531,7 @@ public class CobblemonTask extends Task {
 
     // data is a string that should match an entry in the (comma separated) form field.
     public void increaseWoPokemon(TeamData teamData, String data, String executedAction, long progress) {
-        if (actions.contains(executedAction) && forms.contains(data) || forms.isEmpty()) {
+        if (actions.contains(executedAction) && (forms.contains(data) || forms.isEmpty())) {
             teamData.addProgress(this, progress);
         }
     }
