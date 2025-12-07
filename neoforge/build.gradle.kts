@@ -54,13 +54,9 @@ dependencies {
 
     modApi("dev.architectury:architectury-neoforge:${property("architectury_version")}")
 
-
-    // https://www.curseforge.com/minecraft/mc-mods/ftb-quests-forge/files
-    modImplementation("curse.maven:ftb-quests-forge-289412:5882270")
-    // https://www.curseforge.com/minecraft/mc-mods/ftb-library-forge/files
-    modImplementation("curse.maven:ftb-library-forge-404465:5893689")
-    // https://www.curseforge.com/minecraft/mc-mods/ftb-teams-forge/files
-    modImplementation("curse.maven:ftb-teams-forge-404468:5882217")
+    modImplementation("dev.ftb.mods:ftb-quests-neoforge:${property("ftb_quests_version")}") { isTransitive = false }
+    modImplementation("dev.ftb.mods:ftb-teams-neoforge:${property("ftb_teams_version")}") { isTransitive = false }
+    modImplementation("dev.ftb.mods:ftb-library-neoforge:${property("ftb_lib_version")}") { isTransitive = false }
 }
 
 tasks.processResources {

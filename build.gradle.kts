@@ -19,8 +19,8 @@ allprojects {
     repositories {
         mavenCentral()
         maven("https://maven.impactdev.net/repository/development/")
-        maven ("https://cursemaven.com")
         maven("https://thedarkcolour.github.io/KotlinForForge/")
-        maven(url = "https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/")
+        maven("https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/")
+        maven ("https://maven.ftb.dev/releases")
     }
 }

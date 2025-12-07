@@ -43,27 +43,25 @@ dependencies {
 
 
     modImplementation("com.cobblemon:fabric:${property("cobblemon_version")}")
-    // https://www.curseforge.com/minecraft/mc-mods/ftb-quests-fabric/files/
-    modImplementation("curse.maven:ftb-quests-fabric-438496:5882271")
-    // https://www.curseforge.com/minecraft/mc-mods/ftb-teams-fabric/files/
-    modImplementation("curse.maven:ftb-teams-fabric-438497:5882218")
-    // https://www.curseforge.com/minecraft/mc-mods/ftb-library-fabric/files/
-    modImplementation("curse.maven:ftb-library-fabric-438495:5893688")
-    // https://www.curseforge.com/minecraft/mc-mods/ftb-chunks-fabric/files/
+    modImplementation("dev.ftb.mods:ftb-quests-fabric:${property("ftb_quests_version")}") { isTransitive = false }
+    modImplementation("dev.ftb.mods:ftb-teams-fabric:${property("ftb_teams_version")}") { isTransitive = false }
+    modImplementation("dev.ftb.mods:ftb-library-fabric:${property("ftb_lib_version")}") { isTransitive = false }
 }
 
 tasks.processResources {
-    expand(mapOf(
-        "mod_name" to project.property("mod_name"),
-        "mod_id" to project.property("mod_id"),
-        "mod_version" to project.property("mod_version"),
-        "mod_description" to project.property("mod_description"),
-        "repository" to project.property("repository"),
-        "license" to project.property("license"),
-        "mod_icon" to project.property("mod_icon"),
-        "environment" to project.property("environment"),
-        "supported_minecraft_versions" to project.property("supported_minecraft_versions")
-    ))
+    expand(
+        mapOf(
+            "mod_name" to project.property("mod_name"),
+            "mod_id" to project.property("mod_id"),
+            "mod_version" to project.property("mod_version"),
+            "mod_description" to project.property("mod_description"),
+            "repository" to project.property("repository"),
+            "license" to project.property("license"),
+            "mod_icon" to project.property("mod_icon"),
+            "environment" to project.property("environment"),
+            "supported_minecraft_versions" to project.property("supported_minecraft_versions")
+        )
+    )
 }
 
 
