@@ -250,7 +250,7 @@ public class CobblemonTask extends Task {
 
     private void addConfigList(ConfigGroup config, String listName, List<String> listData, List<String> optionsList, Function<ResourceLocation, Icon> iconProcessor, Function<String, String> nameProcessor) {
         NameMap<String> nameMap = NameMap.of(optionsList.getFirst(), optionsList).id(s -> s).name(s -> Component.translatable(nameProcessor == null ? MOD_ID + "." + listName + "." + s : nameProcessor.apply(s))).icon(s -> iconProcessor == null ? pokeBallIcon : iconProcessor.apply(ResourceLocation.parse(s))).create();
-        config.addList(listName, listData, new EnumConfig<>(nameMap), optionsList.getLast()).setNameKey(MOD_ID + ".task." + listName);
+        config.addList(listName, listData, new FixedEnumConfig<>(nameMap), optionsList.getLast()).setNameKey(MOD_ID + ".task." + listName);
     }
 
     @Override
